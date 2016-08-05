@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NETWORK_HYPERX_DIMORDERROUTINGALGORITHM_H_
-#define NETWORK_HYPERX_DIMORDERROUTINGALGORITHM_H_
+#ifndef NETWORK_HYPERX_UGALROUTINGALGORITHM_H_
+#define NETWORK_HYPERX_UGALROUTINGALGORITHM_H_
 
 #include <colhash/tuplehash.h>
 #include <json/json.h>
@@ -32,15 +32,14 @@
 
 namespace HyperX {
 
-class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
+class UgalRoutingAlgorithm : public RoutingAlgorithm {
  public:
-  DimOrderRoutingAlgorithm(
-      const std::string& _name, const Component* _parent, Router* _router,
-      u64 _latency, u32 _baseVc, u32 _numVcs,
-      const std::vector<u32>& _dimensionWidths,
-      const std::vector<u32>& _dimensionWeights,
-      u32 _concentration, Json::Value _settings);
-  ~DimOrderRoutingAlgorithm();
+  UgalRoutingAlgorithm(const std::string& _name, const Component* _parent,
+                       Router* _router, u64 _latency, u32 _baseVc, u32 _numVcs,
+                       const std::vector<u32>& _dimensionWidths,
+                       const std::vector<u32>& _dimensionWeights,
+                       u32 _concentration, Json::Value _settings);
+  ~UgalRoutingAlgorithm();
 
  protected:
   void processRequest(Flit* _flit,
@@ -52,11 +51,18 @@ class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
   const u32 concentration_;
   u32 maxOutputs_;
   OutputAlg outputAlg_;
-  bool outputTypePort_;
-  std::unordered_set<std::tuple<u32, u32, f64>> vcPool_;
-  std::unordered_set<std::tuple<u32, u32, f64>> outputPorts_;
+  std::unordered_set<std::tuple<u32, u32, f64>> vcPoolReg_;
+  std::unordered_set<std::tuple<u32, u32, f64>> vcPoolVal_;
+  std::unordered_set<std::tuple<u32, u32, f64>> outputPortsReg_;
+  std::unordered_set<std::tuple<u32, u32, f64>> outputPortsVal_;
+  IntNodeAlg intNodeAlg_;
+  BaseRoutingAlg routingAlg_;
+  NonMinRoutingAlg nonMinimalAlg_;
+  bool shortCut_;
+  bool firstHopMultiPort_;
+  f64 bias_;
 };
 
 }  // namespace HyperX
 
-#endif  // NETWORK_HYPERX_DIMORDERROUTINGALGORITHM_H_
+#endif  // NETWORK_HYPERX_UGALROUTINGALGORITHM_H_
