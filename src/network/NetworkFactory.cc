@@ -19,6 +19,7 @@
 
 #include "network/butterfly/Network.h"
 #include "network/foldedclos/Network.h"
+#include "network/hierarchicalhyperx/Network.h"
 #include "network/hyperx/Network.h"
 #include "network/torus/Network.h"
 #include "network/uno/Network.h"
@@ -32,6 +33,9 @@ Network* NetworkFactory::createNetwork(
     return new Butterfly::Network(_name, _parent, _metadataHandler, _settings);
   } else if (topology == "folded_clos") {
     return new FoldedClos::Network(_name, _parent, _metadataHandler, _settings);
+  } else if (topology == "hierarchical_hyperx") {
+    return new HierarchicalHyperX::Network(_name, _parent,
+                                           _metadataHandler, _settings);
   } else if (topology == "hyperx") {
     return new HyperX::Network(_name, _parent, _metadataHandler, _settings);
   } else if (topology == "torus") {
