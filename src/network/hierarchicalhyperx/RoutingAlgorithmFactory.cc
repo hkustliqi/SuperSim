@@ -85,8 +85,8 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
     return new HierarchicalHyperX::
         ThresholdProgressiveAdaptiveGRoutingAlgorithm(
             _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
-            globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
-            concentration_, globalLinksPerRouter_,
+            globalDimensionWeights_, localDimensionWidths_,
+            localDimensionWeights_, concentration_, globalLinksPerRouter_,
             congestionThreshold);
   } else {
     fprintf(stderr, "Unknown routing algorithm: '%s'\n", algorithm.c_str());

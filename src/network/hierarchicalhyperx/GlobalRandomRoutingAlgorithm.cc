@@ -87,8 +87,8 @@ void GlobalRandomRoutingAlgorithm::processRequest(
   assert(_response->size() > 0);
 }
 
-std::unordered_set<u32> GlobalRandomRoutingAlgorithm::routing(Flit* _flit,
-                                                              const std::vector<u32>* destinationAddress) {
+std::unordered_set<u32> GlobalRandomRoutingAlgorithm::routing
+  (Flit* _flit, const std::vector<u32>* destinationAddress) {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   assert(routerAddress.size() == destinationAddress->size() - 1);

@@ -34,10 +34,11 @@ ProgressiveAdaptiveRoutingAlgorithm::ProgressiveAdaptiveRoutingAlgorithm(
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter)
-    : ValiantRoutingAlgorithm(_name, _parent,
-                              _latency, _router, _numVcs, _globalDimensionWidths,
-                              _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
-                              _concentration, _globalLinksPerRouter, true) {
+    : ValiantRoutingAlgorithm
+      (_name, _parent,
+       _latency, _router, _numVcs, _globalDimensionWidths,
+       _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
+       _concentration, _globalLinksPerRouter, true) {
   assert(numVcs_ >= 2 * localDimWidths_.size() + 2 * globalDimWidths_.size());
 }
 
@@ -67,8 +68,8 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
   std::unordered_set<u32> outputPorts;
   // routing depends on mode
   if (ri->valiantMode == false) {
-    outputPorts = ProgressiveAdaptiveRoutingAlgorithm::routing(_flit,
-                                                               destinationAddress);
+    outputPorts = ProgressiveAdaptiveRoutingAlgorithm::routing
+      (_flit, destinationAddress);
     assert(outputPorts.size() >= 1);
   } else {
     // use Valiant routing

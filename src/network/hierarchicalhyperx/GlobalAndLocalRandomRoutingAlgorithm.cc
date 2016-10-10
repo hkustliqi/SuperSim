@@ -170,8 +170,8 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
         }
       }
       // pick a random local diff dim
-      u32 localDim = diffLocalDims.at(gSim->rnd.nextU64(0,
-                                                        diffLocalDims.size() - 1));
+      u32 localDim = diffLocalDims.
+        at(gSim->rnd.nextU64(0, diffLocalDims.size() - 1));
       u32 portBase = concentration_;
       for (u32 tmp = 0; tmp < localDim; tmp++) {
         portBase += ((localDimWidths_.at(tmp) - 1)
@@ -214,8 +214,8 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
       assert(res);
     } else {
       // pick a random local diff dim
-      u32 localDim = diffLocalDims.at(gSim->rnd.nextU64(0,
-                                                        diffLocalDims.size() - 1));
+      u32 localDim = diffLocalDims.
+        at(gSim->rnd.nextU64(0, diffLocalDims.size() - 1));
       u32 portBase = concentration_;
       for (u32 tmp = 0; tmp < localDim; tmp++) {
         portBase += ((localDimWidths_.at(tmp) - 1)

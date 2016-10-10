@@ -97,9 +97,9 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
   assert(_response->size() > 0);
 }
 
-std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing(Flit* _flit,
-                                                                 const std::vector<u32>* destinationAddress) {
-  // ex: [1,...,m,1,...,n]
+std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
+  (Flit* _flit, const std::vector<u32>* destinationAddress) {
+    // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   assert(routerAddress.size() == destinationAddress->size() - 1);
 
@@ -261,9 +261,9 @@ void MinimalAdaptiveRoutingAlgorithm::findPortAvailability(
   }
 }
 
-void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst(Flit* _flit,
-                                                   std::unordered_set<u32>* outputPorts,
-                                                   std::vector<u32>* globalOutputPorts, std::vector<u32>* diffGlobalDims) {
+void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
+  (Flit* _flit, std::unordered_set<u32>* outputPorts,
+    std::vector<u32>* globalOutputPorts, std::vector<u32>* diffGlobalDims) {
   Packet* packet = _flit->getPacket();
   const std::vector<u32>& routerAddress = router_->getAddress();
   const std::vector<u32>* destinationAddress =

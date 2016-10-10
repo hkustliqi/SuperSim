@@ -36,11 +36,11 @@ ThresholdProgressiveAdaptiveRoutingAlgorithm(
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
     f64 _threshold, bool _randomGroup)
-    : ValiantRoutingAlgorithm(_name, _parent,
-                              _latency, _router, _numVcs, _globalDimensionWidths,
-                              _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
-                              _concentration, _globalLinksPerRouter, _randomGroup),
-      threshold_(_threshold) {
+  : ValiantRoutingAlgorithm
+    (_name, _parent, _latency, _router, _numVcs, _globalDimensionWidths,
+     _globalDimensionWeights, _localDimensionWidths,
+     _localDimensionWeights, _concentration, _globalLinksPerRouter,
+     _randomGroup), threshold_(_threshold) {
   assert(numVcs_ >= 2 * localDimWidths_.size() + 2 * globalDimWidths_.size());
 }
 
@@ -71,8 +71,8 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
   std::unordered_set<u32> outputPorts;
   // routing depends on mode
   if (ri->valiantMode == false) {
-    outputPorts = ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(_flit,
-                                                                        destinationAddress);
+    outputPorts = ThresholdProgressiveAdaptiveRoutingAlgorithm::routing
+      (_flit, destinationAddress);
     assert(outputPorts.size() >= 1);
   } else {
     // use Valiant routing

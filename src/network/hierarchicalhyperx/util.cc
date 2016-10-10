@@ -19,9 +19,10 @@
 
 namespace HierarchicalHyperX {
 
-void globalPortToLocalAddress(u32 globalPort,
-                              std::vector<u32>* localAddress, u32* localPortWithoutBase,
-                              const std::vector<u32> localDimWidths_) {
+void globalPortToLocalAddress
+  (u32 globalPort,
+    std::vector<u32>* localAddress, u32* localPortWithoutBase,
+    const std::vector<u32> localDimWidths_) {
   u32 localDimensions = localDimWidths_.size();
   u32 numRoutersPerGlobalRouter = 1;
   for (u32 tmp = 0; tmp < localDimensions; tmp++) {
@@ -68,8 +69,8 @@ void setLocalDst(std::vector<u32>* diffGlobalDims,
       packet->getRoutingExtension());
 
   // pick a random global dimension
-  u32 globalDim = diffGlobalDims->at(gSim->rnd.nextU64(0,
-                                                       diffGlobalDims->size() - 1));
+  u32 globalDim = diffGlobalDims->at
+    (gSim->rnd.nextU64(0, diffGlobalDims->size() - 1));
   u32 globalPortBase = 0;
   for (u32 tmp = 0; tmp < globalDim; tmp++) {
     globalPortBase += ((globalDimWidths_.at(tmp) - 1)

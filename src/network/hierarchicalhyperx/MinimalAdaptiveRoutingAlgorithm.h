@@ -29,15 +29,15 @@ namespace HierarchicalHyperX {
 
 class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
  public:
-  MinimalAdaptiveRoutingAlgorithm(const std::string& _name,
-                                  const Component* _parent,
-                                  u64 _latency, Router* _router, u32 _numVcs,
-                                  const std::vector<u32>& _globalDimensionWidths,
-                                  const std::vector<u32>& _globalDimensionWeights,
-                                  const std::vector<u32>& _localDimensionWidths,
-                                  const std::vector<u32>& _localDimensionWeights,
-                                  u32 _concentration, u32 _globalLinksPerRouter,
-                                  f64 _threshold_, u32 _localDeroute);
+  MinimalAdaptiveRoutingAlgorithm(
+    const std::string& _name, const Component* _parent,
+    u64 _latency, Router* _router, u32 _numVcs,
+    const std::vector<u32>& _globalDimensionWidths,
+    const std::vector<u32>& _globalDimensionWeights,
+    const std::vector<u32>& _localDimensionWidths,
+    const std::vector<u32>& _localDimensionWeights,
+    u32 _concentration, u32 _globalLinksPerRouter, f64 _threshold_,
+    u32 _localDeroute);
   ~MinimalAdaptiveRoutingAlgorithm();
 
  protected:
@@ -49,12 +49,14 @@ class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
 
   u32 findHighestPort(std::unordered_map<u32, f64> portAvailability);
 
-  void findPortAvailability(std::vector<u32> diffDims,
-                            std::unordered_map<u32, f64>* portAvailability,
-                            const std::vector<u32>* destinationAddress, Flit* _flit);
+  void findPortAvailability(
+     std::vector<u32> diffDims,
+     std::unordered_map<u32, f64>* portAvailability,
+     const std::vector<u32>* destinationAddress, Flit* _flit);
 
-  void ifAtLocalDst(Flit* _flit, std::unordered_set<u32>* outputPorts,
-                    std::vector<u32>* globalOutputPorts, std::vector<u32>* diffGlobalDims);
+  void ifAtLocalDst(
+     Flit* _flit, std::unordered_set<u32>* outputPorts,
+     std::vector<u32>* globalOutputPorts, std::vector<u32>* diffGlobalDims);
 
   // Router* router_;
   u32 numVcs_;

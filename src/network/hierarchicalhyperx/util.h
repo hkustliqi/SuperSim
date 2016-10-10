@@ -37,9 +37,9 @@ struct RoutingInfo {
   bool valiantMode;
 };
 
-void globalPortToLocalAddress(u32 globalPort,
-                              std::vector<u32>* localAddress, u32* localPortWithoutBase,
-                              const std::vector<u32> localDimWidths_);
+void globalPortToLocalAddress(
+    u32 globalPort, std::vector<u32>* localAddress, u32* localPortWithoutBase,
+    const std::vector<u32> localDimWidths_);
 
 u32 getPortBase(u32 concentration_, const std::vector<u32> localDimWidths_,
                 const std::vector<u32> localDimWeights_);

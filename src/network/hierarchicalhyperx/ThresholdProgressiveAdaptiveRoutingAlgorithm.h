@@ -31,15 +31,15 @@ namespace HierarchicalHyperX {
 class ThresholdProgressiveAdaptiveRoutingAlgorithm
     : public ValiantRoutingAlgorithm {
  public:
-  ThresholdProgressiveAdaptiveRoutingAlgorithm(const std::string& _name,
-                                               const Component* _parent,
-                                               u64 _latency, Router* _router, u32 _numVcs,
-                                               const std::vector<u32>& _globalDimensionWidths,
-                                               const std::vector<u32>& _globalDimensionWeights,
-                                               const std::vector<u32>& _localDimensionWidths,
-                                               const std::vector<u32>& _localDimensionWeights,
-                                               u32 _concentration, u32 _globalLinksPerRouter,
-                                               f64 _threshold_, bool _randomGroup);
+  ThresholdProgressiveAdaptiveRoutingAlgorithm(
+    const std::string& _name, const Component* _parent, u64 _latency,
+    Router* _router, u32 _numVcs,
+    const std::vector<u32>& _globalDimensionWidths,
+    const std::vector<u32>& _globalDimensionWeights,
+    const std::vector<u32>& _localDimensionWidths,
+    const std::vector<u32>& _localDimensionWeights,
+    u32 _concentration, u32 _globalLinksPerRouter,
+    f64 _threshold_, bool _randomGroup);
   ~ThresholdProgressiveAdaptiveRoutingAlgorithm();
 
  protected:

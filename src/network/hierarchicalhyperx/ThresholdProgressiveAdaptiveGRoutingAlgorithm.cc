@@ -37,11 +37,10 @@ ThresholdProgressiveAdaptiveGRoutingAlgorithm(
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
     f64 _threshold)
-    : DimOrderRoutingAlgorithm(_name, _parent,
-                               _latency, _router, _numVcs, _globalDimensionWidths,
-                               _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
-                               _concentration, _globalLinksPerRouter),
-      threshold_(_threshold) {
+  : DimOrderRoutingAlgorithm
+    (_name, _parent, _latency, _router, _numVcs, _globalDimensionWidths,
+     _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
+     _concentration, _globalLinksPerRouter), threshold_(_threshold) {
   // every VC per hop
   assert(numVcs_ >= localDimWidths_.size() * (globalDimWidths_.size() + 1) + 1
          + globalDimWidths_.size() + 1 + 1);
