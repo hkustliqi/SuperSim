@@ -42,10 +42,12 @@ class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
  protected:
   void processRequest(
       Flit* _flit, RoutingAlgorithm::Response* _response) override;
+
+  // the following method and variable are made protected because
+  // they will be inherited, such as by Valiants routing
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>* destinationAddress);
 
-  // Router* router_;
   u32 numVcs_;
   u32 numPorts_;
   const std::vector<u32> globalDimWidths_;

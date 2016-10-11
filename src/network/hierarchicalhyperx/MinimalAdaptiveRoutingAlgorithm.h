@@ -44,6 +44,7 @@ class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
   void processRequest(
       Flit* _flit, RoutingAlgorithm::Response* _response) override;
 
+ private:
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>* destinationAddress);
 
@@ -58,7 +59,6 @@ class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
      Flit* _flit, std::unordered_set<u32>* outputPorts,
      std::vector<u32>* globalOutputPorts, std::vector<u32>* diffGlobalDims);
 
-  // Router* router_;
   u32 numVcs_;
   u32 numPorts_;
   const std::vector<u32> globalDimWidths_;

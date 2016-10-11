@@ -45,6 +45,7 @@ DimOrderRoutingAlgorithm {
   void processRequest(
       Flit* _flit, RoutingAlgorithm::Response* _response) override;
 
+ private:
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>* destinationAddress);
 
