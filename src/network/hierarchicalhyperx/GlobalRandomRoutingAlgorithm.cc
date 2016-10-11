@@ -135,7 +135,7 @@ std::unordered_set<u32> GlobalRandomRoutingAlgorithm::routing
   // if at different global router
   if (atGlobalDst == false) {
     if (ri->localDst == nullptr) {
-      setLocalDst(&diffGlobalDims, destinationAddress, &globalOutputPorts,
+      setLocalDst(diffGlobalDims, destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }

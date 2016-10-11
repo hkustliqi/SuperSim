@@ -44,13 +44,13 @@ void globalPortToLocalAddress(
 u32 getPortBase(u32 _concentration_, const std::vector<u32>& _localDimWidths,
                 const std::vector<u32>& _localDimWeights);
 
-void setLocalDst(std::vector<u32>* diffGlobalDims,
-                 const std::vector<u32>& destinationAddress,
-                 std::vector<u32>* globalOutputPorts, Flit* _flit,
-                 const std::vector<u32>& routerAddress,
-                 const std::vector<u32> localDimWidths_,
-                 const std::vector<u32> globalDimWidths_,
-                 const std::vector<u32> globalDimWeights_);
+void setLocalDst(const std::vector<u32>& _diffGlobalDims,
+                 const std::vector<u32>& _destinationAddress,
+                 std::vector<u32>* _globalOutputPorts, Flit* _flit,
+                 const std::vector<u32>& _routerAddress,
+                 const std::vector<u32>& _localDimWidths,
+                 const std::vector<u32>& _globalDimWidths,
+                 const std::vector<u32>& _globalDimWeights);
 }  // namespace HierarchicalHyperX
 
 #endif  // NETWORK_HIERARCHICALHYPERX_UTIL_H_

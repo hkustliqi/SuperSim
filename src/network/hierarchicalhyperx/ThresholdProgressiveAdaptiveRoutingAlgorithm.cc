@@ -212,7 +212,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
     if (ri->localDst == nullptr) {
       std::vector<u32>* diffGlobalDims = new std::vector<u32>;
       diffGlobalDims->push_back(globalDim);
-      setLocalDst(diffGlobalDims, destinationAddress, &globalOutputPorts,
+      setLocalDst(*diffGlobalDims, destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }

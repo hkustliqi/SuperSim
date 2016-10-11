@@ -56,54 +56,54 @@ u32 getPortBase(u32 _concentration, const std::vector<u32>& _localDimWidths,
   return portBase;
 }
 
-void setLocalDst(std::vector<u32>* diffGlobalDims,
-                 const std::vector<u32>& destinationAddress,
-                 std::vector<u32>* globalOutputPorts, Flit* _flit,
-                 const std::vector<u32>& routerAddress,
-                 const std::vector<u32> localDimWidths_,
-                 const std::vector<u32> globalDimWidths_,
-                 const std::vector<u32> globalDimWeights_) {
-  u32 localDimensions = localDimWidths_.size();
+void setLocalDst(const std::vector<u32>& _diffGlobalDims,
+                 const std::vector<u32>& _destinationAddress,
+                 std::vector<u32>* _globalOutputPorts, Flit* _flit,
+                 const std::vector<u32>& _routerAddress,
+                 const std::vector<u32>& _localDimWidths,
+                 const std::vector<u32>& _globalDimWidths,
+                 const std::vector<u32>& _globalDimWeights) {
+  u32 localDimensions = _localDimWidths.size();
   Packet* packet = _flit->getPacket();
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       packet->getRoutingExtension());
 
   // pick a random global dimension
-  u32 globalDim = diffGlobalDims->at
-    (gSim->rnd.nextU64(0, diffGlobalDims->size() - 1));
+  u32 globalDim = _diffGlobalDims.at
+    (gSim->rnd.nextU64(0, _diffGlobalDims.size() - 1));
   u32 globalPortBase = 0;
   for (u32 tmp = 0; tmp < globalDim; tmp++) {
-    globalPortBase += ((globalDimWidths_.at(tmp) - 1)
-                       * globalDimWeights_.at(tmp));
+    globalPortBase += ((_globalDimWidths.at(tmp) - 1)
+                       * _globalDimWeights.at(tmp));
   }
   // find the right port of the virtual global router
-  u32 src = routerAddress.at(localDimensions + globalDim);
-  u32 dst = destinationAddress.at(localDimensions + globalDim + 1);
+  u32 src = _routerAddress.at(localDimensions + globalDim);
+  u32 dst = _destinationAddress.at(localDimensions + globalDim + 1);
   if (dst < src) {
-    dst += globalDimWidths_.at(globalDim);
+    dst += _globalDimWidths.at(globalDim);
   }
-  u32 offset = (dst - src - 1) * globalDimWeights_.at(globalDim);
+  u32 offset = (dst - src - 1) * _globalDimWeights.at(globalDim);
 
   // add all ports where the two global routers are connecting
-  for (u32 weight = 0; weight < globalDimWeights_.at(globalDim);
+  for (u32 weight = 0; weight < _globalDimWeights.at(globalDim);
        weight++) {
     u32 globalPort = globalPortBase + offset + weight;
-    globalOutputPorts->push_back(globalPort);
+    _globalOutputPorts->push_back(globalPort);
   }
-  assert(globalOutputPorts->size() > 0);
+  assert(_globalOutputPorts->size() > 0);
 
   bool hasGlobalLinkToDst = false;
   std::vector<u32>* dstPort = new std::vector<u32>;
 
   // set local dst to self if has global link
-  for (auto itr = globalOutputPorts->begin();
-       itr != globalOutputPorts->end(); itr++) {
+  for (auto itr = _globalOutputPorts->begin();
+       itr != _globalOutputPorts->end(); itr++) {
     std::vector<u32>* localRouter = new std::vector<u32>(localDimensions);
     u32 connectedPort;
     globalPortToLocalAddress(*itr, localRouter, &connectedPort,
-                             localDimWidths_);
+                             _localDimWidths);
     if (std::equal(localRouter->begin(), localRouter->end(),
-                   routerAddress.begin())) {
+                   _routerAddress.begin())) {
       hasGlobalLinkToDst = true;
       ri->localDst = localRouter;
       dstPort->push_back(connectedPort);
@@ -114,14 +114,14 @@ void setLocalDst(std::vector<u32>* diffGlobalDims,
   // if no global link, pick a random one
   if (hasGlobalLinkToDst == false) {
     // pick a random global port
-    u32 globalPort = globalOutputPorts->at(gSim->rnd.nextU64(
-        0, globalOutputPorts->size() - 1));
+    u32 globalPort = _globalOutputPorts->at(gSim->rnd.nextU64(
+        0, _globalOutputPorts->size() - 1));
 
     // translate global router port number to local router
     std::vector<u32>* localRouter = new std::vector<u32>(localDimensions);
     u32 connectedPort;
     globalPortToLocalAddress(globalPort, localRouter, &connectedPort,
-                             localDimWidths_);
+                             _localDimWidths);
     dstPort->push_back(connectedPort);
     ri->localDst = localRouter;
     ri->localDstPort = dstPort;

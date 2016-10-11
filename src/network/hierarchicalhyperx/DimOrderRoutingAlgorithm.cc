@@ -137,7 +137,7 @@ namespace HierarchicalHyperX {
       if (ri->localDst == nullptr) {
         std::vector<u32>* diffGlobalDims = new std::vector<u32>;
         diffGlobalDims->push_back(globalDim);
-        setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
+        setLocalDst(*diffGlobalDims, _destinationAddress, &globalOutputPorts,
                     _flit, routerAddress, localDimWidths_, globalDimWidths_,
                     globalDimWeights_);
       }
