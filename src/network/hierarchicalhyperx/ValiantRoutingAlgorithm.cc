@@ -63,7 +63,7 @@ void ValiantRoutingAlgorithm::processRequest(
     // delete the routing extension
     packet->setRoutingExtension(nullptr);
   } else {
-    std::unordered_set<u32> outputPorts = routing(_flit, destinationAddress);
+    std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
     assert(outputPorts.size() > 0);
     RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
         packet->getRoutingExtension());
@@ -94,7 +94,7 @@ void ValiantRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ValiantRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>* destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& destinationAddress) {
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();
 
@@ -144,7 +144,7 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
   // intermediate address info
   const std::vector<u32>* intermediateAddress =
       reinterpret_cast<const std::vector<u32>*>(ri->intermediateAddress);
-  assert(routerAddress.size() == destinationAddress->size() - 1);
+  assert(routerAddress.size() == destinationAddress.size() - 1);
   assert(routerAddress.size() == intermediateAddress->size() - 1);
 
   // update intermediate info for Valiant
@@ -173,7 +173,7 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
   // first stage of valiant
   if (ri->intermediateDone == false) {
     outputPorts = DimOrderRoutingAlgorithm::routing(
-        _flit, intermediateAddress);
+        _flit, *intermediateAddress);
   } else {
     outputPorts = DimOrderRoutingAlgorithm::routing(
         _flit, destinationAddress);

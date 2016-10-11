@@ -47,7 +47,7 @@ DimOrderRoutingAlgorithm {
 
  private:
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>* destinationAddress);
+      Flit* _flit, const std::vector<u32>& destinationAddress);
 
   f64 threshold_;
 };

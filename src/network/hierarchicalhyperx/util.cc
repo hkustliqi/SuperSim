@@ -57,7 +57,7 @@ u32 getPortBase(u32 concentration_, const std::vector<u32> localDimWidths_,
 }
 
 void setLocalDst(std::vector<u32>* diffGlobalDims,
-                 const std::vector<u32>* destinationAddress,
+                 const std::vector<u32>& destinationAddress,
                  std::vector<u32>* globalOutputPorts, Flit* _flit,
                  const std::vector<u32>& routerAddress,
                  const std::vector<u32> localDimWidths_,
@@ -78,7 +78,7 @@ void setLocalDst(std::vector<u32>* diffGlobalDims,
   }
   // find the right port of the virtual global router
   u32 src = routerAddress.at(localDimensions + globalDim);
-  u32 dst = destinationAddress->at(localDimensions + globalDim + 1);
+  u32 dst = destinationAddress.at(localDimensions + globalDim + 1);
   if (dst < src) {
     dst += globalDimWidths_.at(globalDim);
   }

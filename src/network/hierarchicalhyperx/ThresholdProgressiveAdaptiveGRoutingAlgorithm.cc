@@ -99,7 +99,7 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
   } else {
     // routing depends on mode
     outputPorts = ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
-        _flit, destinationAddress);
+        _flit, *destinationAddress);
   }
   assert(outputPorts.size() >= 1);
 
@@ -139,7 +139,7 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
-    Flit* _flit, const std::vector<u32>* destinationAddress) {
+    Flit* _flit, const std::vector<u32>& destinationAddress) {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();
@@ -155,7 +155,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
   u32 globalPortBase = 0;
   for (globalDim = 0; globalDim < globalDimensions; globalDim++) {
     if (routerAddress.at(localDimensions + globalDim)
-        != destinationAddress->at(localDimensions + globalDim + 1)) {
+        != destinationAddress.at(localDimensions + globalDim + 1)) {
       break;
     }
     globalPortBase += ((globalDimWidths_.at(globalDim) - 1)

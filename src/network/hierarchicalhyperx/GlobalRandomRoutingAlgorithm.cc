@@ -53,7 +53,7 @@ void GlobalRandomRoutingAlgorithm::processRequest(
       _flit->getPacket()->getMessage()->getDestinationAddress();
   Packet* packet = _flit->getPacket();
   // perform routing
-  std::unordered_set<u32> outputPorts = routing(_flit, destinationAddress);
+  std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
   assert(outputPorts.size() >= 1);
   if (*outputPorts.begin() >= getPortBase(concentration_, localDimWidths_,
                                           localDimWeights_)) {
@@ -88,10 +88,10 @@ void GlobalRandomRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> GlobalRandomRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>* destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& destinationAddress) {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
-  assert(routerAddress.size() == destinationAddress->size() - 1);
+  assert(routerAddress.size() == destinationAddress.size() - 1);
 
   Packet* packet = _flit->getPacket();
 
@@ -108,7 +108,7 @@ std::unordered_set<u32> GlobalRandomRoutingAlgorithm::routing
   bool atGlobalDst = true;
   for (u32 globalDim = 0; globalDim < globalDimensions; globalDim++) {
     if (routerAddress.at(localDimensions + globalDim)
-        != destinationAddress->at(localDimensions + globalDim + 1)) {
+        != destinationAddress.at(localDimensions + globalDim + 1)) {
       diffGlobalDims.push_back(globalDim);
       atGlobalDst = false;
     }
@@ -193,7 +193,7 @@ std::unordered_set<u32> GlobalRandomRoutingAlgorithm::routing
     u32 localDim;
     u32 portBase = concentration_;
     for (localDim = 0; localDim < localDimensions; localDim++) {
-      if (routerAddress.at(localDim) != destinationAddress->at(localDim+1)) {
+      if (routerAddress.at(localDim) != destinationAddress.at(localDim+1)) {
         break;
       }
       portBase += ((localDimWidths_.at(localDim) - 1)
@@ -201,13 +201,13 @@ std::unordered_set<u32> GlobalRandomRoutingAlgorithm::routing
     }
     // test if already at destination local router
     if (localDim == localDimensions) {
-      bool res = outputPorts.insert(destinationAddress->at(0)).second;
+      bool res = outputPorts.insert(destinationAddress.at(0)).second;
       (void)res;
       assert(res);
     } else {
       // more local router-to-router hops needed
       u32 src = routerAddress.at(localDim);
-      u32 dst = destinationAddress->at(localDim + 1);
+      u32 dst = destinationAddress.at(localDim + 1);
       if (dst < src) {
         dst += localDimWidths_.at(localDim);
       }

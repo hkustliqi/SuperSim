@@ -53,7 +53,7 @@ namespace HierarchicalHyperX {
       _flit->getPacket()->getMessage()->getDestinationAddress();
     Packet* packet = _flit->getPacket();
     // perform routing
-    std::unordered_set<u32> outputPorts = routing(_flit, destinationAddress);
+    std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
     assert(outputPorts.size() >= 1);
 
     if (*outputPorts.begin() >= getPortBase(concentration_,
@@ -89,10 +89,10 @@ namespace HierarchicalHyperX {
   }
 
   std::unordered_set<u32> DimOrderRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>* destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& _destinationAddress) {
     // ex: [1,...,m,1,...,n]
     const std::vector<u32>& routerAddress = router_->getAddress();
-    assert(routerAddress.size() == destinationAddress->size() - 1);
+    assert(routerAddress.size() == _destinationAddress.size() - 1);
 
     Packet* packet = _flit->getPacket();
     u32 globalDimensions = globalDimWidths_.size();
@@ -107,7 +107,7 @@ namespace HierarchicalHyperX {
     u32 globalPortBase = 0;
     for (globalDim = 0; globalDim < globalDimensions; globalDim++) {
       if (routerAddress.at(localDimensions + globalDim)
-          != destinationAddress->at(localDimensions + globalDim + 1)) {
+          != _destinationAddress.at(localDimensions + globalDim + 1)) {
         break;
       }
       globalPortBase += ((globalDimWidths_.at(globalDim) - 1)
@@ -137,7 +137,7 @@ namespace HierarchicalHyperX {
       if (ri->localDst == nullptr) {
         std::vector<u32>* diffGlobalDims = new std::vector<u32>;
         diffGlobalDims->push_back(globalDim);
-        setLocalDst(diffGlobalDims, destinationAddress, &globalOutputPorts,
+        setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
                     _flit, routerAddress, localDimWidths_, globalDimWidths_,
                     globalDimWeights_);
       }
@@ -195,7 +195,7 @@ namespace HierarchicalHyperX {
       u32 localDim;
       u32 portBase = concentration_;
       for (localDim = 0; localDim < localDimensions; localDim++) {
-        if (routerAddress.at(localDim) != destinationAddress->at(localDim+1)) {
+        if (routerAddress.at(localDim) != _destinationAddress.at(localDim+1)) {
           break;
         }
         portBase += ((localDimWidths_.at(localDim) - 1)
@@ -203,13 +203,13 @@ namespace HierarchicalHyperX {
       }
       // test if already at destination local router
       if (localDim == localDimensions) {
-        bool res = outputPorts.insert(destinationAddress->at(0)).second;
+        bool res = outputPorts.insert(_destinationAddress.at(0)).second;
         (void)res;
         assert(res);
       } else {
         // more local router-to-router hops needed
         u32 src = routerAddress.at(localDim);
-        u32 dst = destinationAddress->at(localDim + 1);
+        u32 dst = _destinationAddress.at(localDim + 1);
         if (dst < src) {
           dst += localDimWidths_.at(localDim);
         }

@@ -45,7 +45,7 @@ u32 getPortBase(u32 concentration_, const std::vector<u32> localDimWidths_,
                 const std::vector<u32> localDimWeights_);
 
 void setLocalDst(std::vector<u32>* diffGlobalDims,
-                 const std::vector<u32>* destinationAddress,
+                 const std::vector<u32>& destinationAddress,
                  std::vector<u32>* globalOutputPorts, Flit* _flit,
                  const std::vector<u32>& routerAddress,
                  const std::vector<u32> localDimWidths_,

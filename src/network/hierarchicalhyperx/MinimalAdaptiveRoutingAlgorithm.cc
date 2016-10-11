@@ -58,7 +58,7 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
   Packet* packet = _flit->getPacket();
 
   // perform routing
-  std::unordered_set<u32> outputPorts = routing(_flit, destinationAddress);
+  std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
   assert(outputPorts.size() >= 1);
 
   if (*outputPorts.begin() >= getPortBase(concentration_, localDimWidths_,
@@ -98,10 +98,10 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>* destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& destinationAddress) {
     // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
-  assert(routerAddress.size() == destinationAddress->size() - 1);
+  assert(routerAddress.size() == destinationAddress.size() - 1);
 
   Packet* packet = _flit->getPacket();
   u32 globalDimensions = globalDimWidths_.size();
@@ -117,7 +117,7 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
   bool atGlobalDst = true;
   for (u32 globalDim = 0; globalDim < globalDimensions; globalDim++) {
     if (routerAddress.at(localDimensions + globalDim)
-        != destinationAddress->at(localDimensions + globalDim + 1)) {
+        != destinationAddress.at(localDimensions + globalDim + 1)) {
       diffGlobalDims->push_back(globalDim);
       atGlobalDst = false;
     }
@@ -182,20 +182,20 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
     std::unordered_map<u32, f64> portAvailability;
     bool atDst = true;
     for (u32 localDim = 0; localDim < localDimensions; localDim++) {
-      if (routerAddress.at(localDim) != destinationAddress->at(localDim+1)) {
+      if (routerAddress.at(localDim) != destinationAddress.at(localDim+1)) {
         diffDims.push_back(localDim);
         atDst = false;
       }
     }
     // test if already at destination local router
     if (atDst == true) {
-      bool res = outputPorts.insert(destinationAddress->at(0)).second;
+      bool res = outputPorts.insert(destinationAddress.at(0)).second;
       (void)res;
       assert(res);
     } else {
       // more local router-to-router hops needed
-      std::vector<u32> dstRouter(destinationAddress->begin() + 1,
-                                 destinationAddress->end());
+      std::vector<u32> dstRouter(destinationAddress.begin() + 1,
+                                 destinationAddress.end());
       findPortAvailability(diffDims, &portAvailability, &dstRouter, _flit);
       // find the port with max availability
       u32 availablePort = findHighestPort(portAvailability);
@@ -306,7 +306,7 @@ void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
     // can deroute and ports all congested
     if (outputPorts->size() == 0 && ri->localDerouteCount > 0) {
       globalOutputPorts->clear();
-      setLocalDst(diffGlobalDims, destinationAddress, globalOutputPorts, _flit,
+      setLocalDst(diffGlobalDims, *destinationAddress, globalOutputPorts, _flit,
                   routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
       ri->localDerouteCount--;

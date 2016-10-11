@@ -46,7 +46,7 @@ class ProgressiveAdaptiveRoutingAlgorithm : public ValiantRoutingAlgorithm {
 
  private:
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>* destinationAddress);
+      Flit* _flit, const std::vector<u32>& destinationAddress);
 };
 
 }  // namespace HierarchicalHyperX
