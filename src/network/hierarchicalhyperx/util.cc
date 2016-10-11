@@ -20,38 +20,38 @@
 namespace HierarchicalHyperX {
 
 void globalPortToLocalAddress
-  (u32 globalPort,
-    std::vector<u32>* localAddress, u32* localPortWithoutBase,
-    const std::vector<u32> localDimWidths_) {
-  u32 localDimensions = localDimWidths_.size();
+  (u32 _globalPort,
+    std::vector<u32>* _localAddress, u32* _localPortWithoutBase,
+    const std::vector<u32>& _localDimWidths) {
+  u32 localDimensions = _localDimWidths.size();
   u32 numRoutersPerGlobalRouter = 1;
   for (u32 tmp = 0; tmp < localDimensions; tmp++) {
-    numRoutersPerGlobalRouter *= localDimWidths_.at(tmp);
+    numRoutersPerGlobalRouter *= _localDimWidths.at(tmp);
   }
   u32 product = 1;
   for (u32 tmp = 0; tmp < localDimensions - 1; tmp++) {
-    product *= localDimWidths_.at(tmp);
+    product *= _localDimWidths.at(tmp);
   }
-  u32 globalPortCopy = globalPort;
+  u32 globalPortCopy = _globalPort;
   for (s32 localDim = localDimensions - 1; localDim >= 0; localDim--) {
-    localAddress->at(localDim) = (globalPortCopy / product)
-        % localDimWidths_.at(localDim);
+    _localAddress->at(localDim) = (globalPortCopy / product)
+        % _localDimWidths.at(localDim);
     globalPortCopy %= product;
     if (localDim != 0) {
-      product /= localDimWidths_.at(localDim - 1);
+      product /= _localDimWidths.at(localDim - 1);
     }
   }
-  assert(localAddress->size() == localDimensions);
-  *localPortWithoutBase = globalPort / numRoutersPerGlobalRouter;
+  assert(_localAddress->size() == localDimensions);
+  *_localPortWithoutBase = _globalPort / numRoutersPerGlobalRouter;
   // assert(*localPortWithoutBase < globalLinksPerRouter_);
 }
 
-u32 getPortBase(u32 concentration_, const std::vector<u32> localDimWidths_,
-                const std::vector<u32> localDimWeights_) {
-  u32 localDimensions = localDimWidths_.size();
-  u32 portBase = concentration_;
+u32 getPortBase(u32 _concentration, const std::vector<u32>& _localDimWidths,
+                const std::vector<u32>& _localDimWeights) {
+  u32 localDimensions = _localDimWidths.size();
+  u32 portBase = _concentration;
   for (u32 i = 0; i < localDimensions; i++) {
-    portBase += ((localDimWidths_.at(i) - 1) * localDimWeights_.at(i));
+    portBase += ((_localDimWidths.at(i) - 1) * _localDimWeights.at(i));
   }
   return portBase;
 }

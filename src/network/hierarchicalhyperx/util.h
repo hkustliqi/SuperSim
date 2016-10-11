@@ -38,11 +38,11 @@ struct RoutingInfo {
 };
 
 void globalPortToLocalAddress(
-    u32 globalPort, std::vector<u32>* localAddress, u32* localPortWithoutBase,
-    const std::vector<u32> localDimWidths_);
+    u32 _globalPort, std::vector<u32>* _localAddress,
+    u32* _localPortWithoutBase, const std::vector<u32>& _localDimWidths);
 
-u32 getPortBase(u32 concentration_, const std::vector<u32> localDimWidths_,
-                const std::vector<u32> localDimWeights_);
+u32 getPortBase(u32 _concentration_, const std::vector<u32>& _localDimWidths,
+                const std::vector<u32>& _localDimWeights);
 
 void setLocalDst(std::vector<u32>* diffGlobalDims,
                  const std::vector<u32>& destinationAddress,
