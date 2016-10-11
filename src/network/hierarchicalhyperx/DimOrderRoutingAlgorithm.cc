@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 #include "network/hierarchicalhyperx/DimOrderRoutingAlgorithm.h"
-#include <strop/strop.h>
-#include <cassert>
 
-#include <unordered_set>
+#include <strop/strop.h>
+
+#include <cassert>
 #include <set>
+#include <unordered_set>
+
+#include "network/hierarchicalhyperx/util.h"
 #include "types/Message.h"
 #include "types/Packet.h"
-#include "network/hierarchicalhyperx/util.h"
 
 namespace HierarchicalHyperX {
 
-  DimOrderRoutingAlgorithm::DimOrderRoutingAlgorithm
+DimOrderRoutingAlgorithm::DimOrderRoutingAlgorithm
   (const std::string& _name, const Component* _parent, u64 _latency,
     Router* _router, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
@@ -44,9 +46,9 @@ namespace HierarchicalHyperX {
            * localDimWidths_.size() + globalDimWidths_.size());
   }
 
-  DimOrderRoutingAlgorithm::~DimOrderRoutingAlgorithm() {}
+DimOrderRoutingAlgorithm::~DimOrderRoutingAlgorithm() {}
 
-  void DimOrderRoutingAlgorithm::processRequest
+void DimOrderRoutingAlgorithm::processRequest
   (Flit* _flit, RoutingAlgorithm::Response* _response) {
     // ex: [c,1,...,m,1,...,n]
     const std::vector<u32>* destinationAddress =
@@ -88,7 +90,7 @@ namespace HierarchicalHyperX {
     assert(_response->size() > 0);
   }
 
-  std::unordered_set<u32> DimOrderRoutingAlgorithm::routing
+std::unordered_set<u32> DimOrderRoutingAlgorithm::routing
   (Flit* _flit, const std::vector<u32>& _destinationAddress) {
     // ex: [1,...,m,1,...,n]
     const std::vector<u32>& routerAddress = router_->getAddress();

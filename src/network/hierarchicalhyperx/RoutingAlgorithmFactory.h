@@ -26,13 +26,13 @@
 #include "network/RoutingAlgorithmFactory.h"
 
 #include "network/hierarchicalhyperx/DimOrderRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ValiantRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/MinimalAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/GlobalAndLocalRandomRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/GlobalRandomRoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/MinimalAdaptiveRoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/ValiantRoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/ProgressiveAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveGRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveRoutingAlgorithm.h"
 #include "network/RoutingAlgorithm.h"
 
 namespace HierarchicalHyperX {
@@ -51,16 +51,16 @@ class RoutingAlgorithmFactory : public ::RoutingAlgorithmFactory {
 
   RoutingAlgorithm* createRoutingAlgorithm(
       const std::string& _name, const Component* _parent, Router* _router,
-      u32 inputPort);
+      u32 _inputPort);
 
  private:
-  u32 numVcs_;
+  const u32 numVcs_;
   const std::vector<u32> globalDimensionWidths_;
   const std::vector<u32> globalDimensionWeights_;
   const std::vector<u32> localDimensionWidths_;
   const std::vector<u32> localDimensionWeights_;
-  u32 globalLinksPerRouter_;
-  u32 concentration_;
+  const u32 globalLinksPerRouter_;
+  const u32 concentration_;
   Json::Value settings_;
 };
 

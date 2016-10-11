@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "network/hierarchicalhyperx/RoutingAlgorithmFactory.h"
+
 #include <cassert>
 
 namespace HierarchicalHyperX {
@@ -39,52 +40,52 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
     const std::string& _name, const Component* _parent, Router* _router,
     u32 _inputPort) {
   std::string algorithm = settings_["algorithm"].asString();
-  u32 _latency = settings_["latency"].asUInt();
-  bool _randomGroup = settings_["random_group"].asBool();
+  u32 latency = settings_["latency"].asUInt();
+  bool randomGroup = settings_["random_group"].asBool();
   f64 congestionThreshold = settings_["congestion_threshold"].asFloat();
   u32 localDetour = settings_["local_detour"].asUInt();
 
   if (algorithm == "dimension_order") {
     return new HierarchicalHyperX::DimOrderRoutingAlgorithm(
-        _name, _parent, _latency, _router, numVcs_, globalDimensionWidths_,
+        _name, _parent, latency, _router, numVcs_, globalDimensionWidths_,
         globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
         concentration_, globalLinksPerRouter_);
   } else if (algorithm == "valiant") {
     return new HierarchicalHyperX::ValiantRoutingAlgorithm(
-        _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
+        _name, _parent, latency, _router,  numVcs_, globalDimensionWidths_,
         globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
-        concentration_, globalLinksPerRouter_, _randomGroup);
+        concentration_, globalLinksPerRouter_, randomGroup);
   } else if (algorithm == "global_random") {
     return new HierarchicalHyperX::GlobalRandomRoutingAlgorithm(
-        _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
+        _name, _parent, latency, _router,  numVcs_, globalDimensionWidths_,
         globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
         concentration_, globalLinksPerRouter_);
   } else if (algorithm == "global_local_random") {
     return new HierarchicalHyperX::GlobalAndLocalRandomRoutingAlgorithm(
-        _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
+        _name, _parent, latency, _router,  numVcs_, globalDimensionWidths_,
         globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
         concentration_, globalLinksPerRouter_);
   } else if (algorithm == "min_adaptive") {
     return new HierarchicalHyperX::MinimalAdaptiveRoutingAlgorithm(
-        _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
+        _name, _parent, latency, _router,  numVcs_, globalDimensionWidths_,
         globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
         concentration_, globalLinksPerRouter_,
         congestionThreshold, localDetour);
   } else if (algorithm == "progressive_adaptive") {
     return new HierarchicalHyperX::ProgressiveAdaptiveRoutingAlgorithm(
-        _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
+        _name, _parent, latency, _router,  numVcs_, globalDimensionWidths_,
         globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
         concentration_, globalLinksPerRouter_);
   } else if (algorithm == "threshold_progressive_adaptive") {
     return new HierarchicalHyperX::ThresholdProgressiveAdaptiveRoutingAlgorithm(
-        _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
+        _name, _parent, latency, _router,  numVcs_, globalDimensionWidths_,
         globalDimensionWeights_, localDimensionWidths_, localDimensionWeights_,
         concentration_, globalLinksPerRouter_,
-        congestionThreshold, _randomGroup);
+        congestionThreshold, randomGroup);
   } else if (algorithm == "progressive_adaptive_g") {
     return new HierarchicalHyperX::
         ThresholdProgressiveAdaptiveGRoutingAlgorithm(
-            _name, _parent, _latency, _router,  numVcs_, globalDimensionWidths_,
+            _name, _parent, latency, _router,  numVcs_, globalDimensionWidths_,
             globalDimensionWeights_, localDimensionWidths_,
             localDimensionWeights_, concentration_, globalLinksPerRouter_,
             congestionThreshold);

@@ -38,6 +38,7 @@ class ValiantRoutingAlgorithm : public DimOrderRoutingAlgorithm {
                           const std::vector<u32>& _localDimensionWeights,
                           u32 _concentration, u32 _globalLinksPerRouter,
                           bool _randomGroup);
+
   ~ValiantRoutingAlgorithm();
 
  protected:
@@ -47,8 +48,8 @@ class ValiantRoutingAlgorithm : public DimOrderRoutingAlgorithm {
   // the following method and variable are made protected because
   // they will be inherited, such as by Valiants routing
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>& destinationAddress);
-  bool randomGroup_;
+      Flit* _flit, const std::vector<u32>& _destinationAddress);
+  const bool randomGroup_;
 };
 
 }  // namespace HierarchicalHyperX

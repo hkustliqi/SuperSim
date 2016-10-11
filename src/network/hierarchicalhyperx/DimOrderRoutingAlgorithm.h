@@ -48,14 +48,13 @@ class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress);
 
-  u32 numVcs_;
-  u32 numPorts_;
+  const u32 numVcs_;
   const std::vector<u32> globalDimWidths_;
   const std::vector<u32> globalDimWeights_;
   const std::vector<u32> localDimWidths_;
   const std::vector<u32> localDimWeights_;
-  u32 concentration_;
-  u32 globalLinksPerRouter_;
+  const u32 concentration_;
+  const u32 globalLinksPerRouter_;
 };
 
 }  // namespace HierarchicalHyperX

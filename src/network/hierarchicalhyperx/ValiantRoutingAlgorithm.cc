@@ -16,9 +16,11 @@
 #include "network/hierarchicalhyperx/ValiantRoutingAlgorithm.h"
 
 #include <strop/strop.h>
+
 #include <cassert>
-#include <unordered_set>
 #include <set>
+#include <unordered_set>
+
 #include "types/Packet.h"
 #include "types/Message.h"
 #include "network/hierarchicalhyperx/util.h"
@@ -94,7 +96,7 @@ void ValiantRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ValiantRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>& destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& _destinationAddress) {
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();
 
@@ -144,7 +146,7 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
   // intermediate address info
   const std::vector<u32>* intermediateAddress =
       reinterpret_cast<const std::vector<u32>*>(ri->intermediateAddress);
-  assert(routerAddress.size() == destinationAddress.size() - 1);
+  assert(routerAddress.size() == _destinationAddress.size() - 1);
   assert(routerAddress.size() == intermediateAddress->size() - 1);
 
   // update intermediate info for Valiant
@@ -176,7 +178,7 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
         _flit, *intermediateAddress);
   } else {
     outputPorts = DimOrderRoutingAlgorithm::routing(
-        _flit, destinationAddress);
+        _flit, _destinationAddress);
   }
   return outputPorts;
 }

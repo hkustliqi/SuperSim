@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 #include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveRoutingAlgorithm.h"
-#include <strop/strop.h>
-#include <cassert>
 
+#include <strop/strop.h>
+
+#include <cassert>
+#include <set>
 #include <unordered_set>
 #include <unordered_map>
-#include <set>
+
 #include "types/Message.h"
 #include "types/Packet.h"
 #include "network/hierarchicalhyperx/util.h"
@@ -177,7 +179,7 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
-    Flit* _flit, const std::vector<u32>& destinationAddress) {
+    Flit* _flit, const std::vector<u32>& _destinationAddress) {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();
@@ -193,7 +195,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
   u32 globalPortBase = 0;
   for (globalDim = 0; globalDim < globalDimensions; globalDim++) {
     if (routerAddress.at(localDimensions + globalDim)
-        != destinationAddress.at(localDimensions + globalDim + 1)) {
+        != _destinationAddress.at(localDimensions + globalDim + 1)) {
       break;
     }
     globalPortBase += ((globalDimWidths_.at(globalDim) - 1)
@@ -212,7 +214,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
     if (ri->localDst == nullptr) {
       std::vector<u32>* diffGlobalDims = new std::vector<u32>;
       diffGlobalDims->push_back(globalDim);
-      setLocalDst(*diffGlobalDims, destinationAddress, &globalOutputPorts,
+      setLocalDst(*diffGlobalDims, _destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
@@ -253,7 +255,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
         ri->localDstPort = nullptr;
         packet->setRoutingExtension(ri);
         outputPorts = ValiantRoutingAlgorithm::routing(
-            _flit, destinationAddress);
+            _flit, _destinationAddress);
       }
       assert(outputPorts.size() >= 1);
     } else {
@@ -285,8 +287,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
     }
   } else {
     // not in first group, just use dimension order
-    return DimOrderRoutingAlgorithm::routing(
-        _flit, destinationAddress);
+    return DimOrderRoutingAlgorithm::routing(_flit, _destinationAddress);
   }
   assert(outputPorts.size() >= 1);
   return outputPorts;

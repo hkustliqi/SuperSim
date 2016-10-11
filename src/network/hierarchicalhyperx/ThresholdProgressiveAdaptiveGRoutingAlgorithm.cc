@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 #include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveGRoutingAlgorithm.h"
-#include <strop/strop.h>
-#include <cassert>
 
+#include <strop/strop.h>
+
+#include <cassert>
+#include <set>
 #include <unordered_set>
 #include <unordered_map>
-#include <set>
+
 #include "types/Message.h"
 #include "types/Packet.h"
 #include "network/hierarchicalhyperx/util.h"
@@ -28,7 +30,7 @@
 namespace HierarchicalHyperX {
 
 ThresholdProgressiveAdaptiveGRoutingAlgorithm::
-ThresholdProgressiveAdaptiveGRoutingAlgorithm(
+  ThresholdProgressiveAdaptiveGRoutingAlgorithm(
     const std::string& _name, const Component* _parent, u64 _latency,
     Router* _router, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
@@ -47,7 +49,7 @@ ThresholdProgressiveAdaptiveGRoutingAlgorithm(
 }
 
 ThresholdProgressiveAdaptiveGRoutingAlgorithm::
-~ThresholdProgressiveAdaptiveGRoutingAlgorithm() {
+  ~ThresholdProgressiveAdaptiveGRoutingAlgorithm() {
 }
 
 void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
@@ -139,7 +141,7 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
-    Flit* _flit, const std::vector<u32>& destinationAddress) {
+    Flit* _flit, const std::vector<u32>& _destinationAddress) {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();
@@ -155,7 +157,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
   u32 globalPortBase = 0;
   for (globalDim = 0; globalDim < globalDimensions; globalDim++) {
     if (routerAddress.at(localDimensions + globalDim)
-        != destinationAddress.at(localDimensions + globalDim + 1)) {
+        != _destinationAddress.at(localDimensions + globalDim + 1)) {
       break;
     }
     globalPortBase += ((globalDimWidths_.at(globalDim) - 1)
@@ -173,7 +175,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
     if (ri->localDst == nullptr) {
       std::vector<u32>* diffGlobalDims = new std::vector<u32>;
       diffGlobalDims->push_back(globalDim);
-      setLocalDst(*diffGlobalDims, destinationAddress, &globalOutputPorts,
+      setLocalDst(*diffGlobalDims, _destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
@@ -269,8 +271,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
     }
   } else {
     // not in first group, just use dimension order
-    return DimOrderRoutingAlgorithm::routing(
-        _flit, destinationAddress);
+    return DimOrderRoutingAlgorithm::routing(_flit, _destinationAddress);
   }
   assert(outputPorts.size() >= 1);
   return outputPorts;

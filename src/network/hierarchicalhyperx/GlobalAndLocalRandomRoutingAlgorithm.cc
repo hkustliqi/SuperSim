@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 #include "network/hierarchicalhyperx/GlobalAndLocalRandomRoutingAlgorithm.h"
-#include <strop/strop.h>
-#include <cassert>
 
-#include <unordered_set>
+#include <strop/strop.h>
+
+#include <cassert>
 #include <set>
+#include <unordered_set>
+
+#include "network/hierarchicalhyperx/util.h"
 #include "types/Message.h"
 #include "types/Packet.h"
-#include "network/hierarchicalhyperx/util.h"
 
 namespace HierarchicalHyperX {
 
@@ -54,7 +56,7 @@ void GlobalAndLocalRandomRoutingAlgorithm::processRequest(
   Packet* packet = _flit->getPacket();
 
   // perform routing
-  std::unordered_set<u32> outputPorts = routing(_flit, destinationAddress);
+  std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
   assert(outputPorts.size() >= 1);
 
   u32 portBase = getPortBase(concentration_, localDimWidths_, localDimWeights_);
@@ -91,10 +93,10 @@ void GlobalAndLocalRandomRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
-(Flit* _flit, const std::vector<u32>* destinationAddress) {
+(Flit* _flit, const std::vector<u32>& _destinationAddress) {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
-  assert(routerAddress.size() == destinationAddress->size() - 1);
+  assert(routerAddress.size() == _destinationAddress.size() - 1);
 
   Packet* packet = _flit->getPacket();
 
@@ -111,7 +113,7 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
   bool atGlobalDst = true;
   for (u32 globalDim = 0; globalDim < globalDimensions; globalDim++) {
     if (routerAddress.at(localDimensions + globalDim)
-        != destinationAddress->at(localDimensions + globalDim + 1)) {
+        != _destinationAddress.at(localDimensions + globalDim + 1)) {
       diffGlobalDims.push_back(globalDim);
       atGlobalDst = false;
     }
@@ -139,7 +141,7 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
   if (atGlobalDst == false) {
     if (ri->localDst == nullptr) {
       // pick a random global dimension
-      setLocalDst(diffGlobalDims, *destinationAddress, &globalOutputPorts,
+      setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
@@ -202,14 +204,14 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
     bool atDst = true;
     std::vector<u32> diffLocalDims;
     for (u32 localDim = 0; localDim < localDimensions; localDim++) {
-      if (routerAddress.at(localDim) != destinationAddress->at(localDim+1)) {
+      if (routerAddress.at(localDim) != _destinationAddress.at(localDim+1)) {
         diffLocalDims.push_back(localDim);
         atDst = false;
       }
     }
     // test if already at destination local router
     if (atDst == true) {
-      bool res = outputPorts.insert(destinationAddress->at(0)).second;
+      bool res = outputPorts.insert(_destinationAddress.at(0)).second;
       (void)res;
       assert(res);
     } else {
@@ -223,7 +225,7 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
       }
       // more local router-to-router hops needed
       u32 src = routerAddress.at(localDim);
-      u32 dst = destinationAddress->at(localDim + 1);
+      u32 dst = _destinationAddress.at(localDim + 1);
       if (dst < src) {
         dst += localDimWidths_.at(localDim);
       }

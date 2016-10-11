@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "event/Component.h"
-#include "network/RoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/DimOrderRoutingAlgorithm.h"
+#include "network/RoutingAlgorithm.h"
 #include "router/Router.h"
 
 namespace HierarchicalHyperX {
@@ -39,6 +39,7 @@ DimOrderRoutingAlgorithm {
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter, f64 _threshold_);
+
   ~ThresholdProgressiveAdaptiveGRoutingAlgorithm();
 
  protected:
@@ -47,9 +48,9 @@ DimOrderRoutingAlgorithm {
 
  private:
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>& destinationAddress);
+      Flit* _flit, const std::vector<u32>& _destinationAddress);
 
-  f64 threshold_;
+  const f64 threshold_;
 };
 
 }  // namespace HierarchicalHyperX
