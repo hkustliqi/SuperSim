@@ -93,21 +93,21 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
   assert(_globalOutputPorts->size() > 0);
 
   bool hasGlobalLinkToDst = false;
-  std::vector<u32> dstPort;
+  std::vector<u32>* dstPort = new std::vector<u32>;
 
   // set local dst to self if has global link
   for (auto itr = _globalOutputPorts->begin();
        itr != _globalOutputPorts->end(); itr++) {
-    std::vector<u32> localRouter(localDimensions);
+    std::vector<u32>* localRouter = new std::vector<u32>(localDimensions);
     u32 connectedPort;
-    globalPortToLocalAddress(*itr, &localRouter, &connectedPort,
+    globalPortToLocalAddress(*itr, localRouter, &connectedPort,
                              _localDimWidths);
-    if (std::equal(localRouter.begin(), localRouter.end(),
+    if (std::equal(localRouter->begin(), localRouter->end(),
                    _routerAddress.begin())) {
       hasGlobalLinkToDst = true;
-      ri->localDst = &localRouter;
-      dstPort.push_back(connectedPort);
-      ri->localDstPort = &dstPort;
+      ri->localDst = localRouter;
+      dstPort->push_back(connectedPort);
+      ri->localDstPort = dstPort;
       packet->setRoutingExtension(ri);
     }
   }
@@ -118,13 +118,13 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
         0, _globalOutputPorts->size() - 1));
 
     // translate global router port number to local router
-    std::vector<u32> localRouter(localDimensions);
+    std::vector<u32>* localRouter = new std::vector<u32>(localDimensions);
     u32 connectedPort;
-    globalPortToLocalAddress(globalPort, &localRouter, &connectedPort,
+    globalPortToLocalAddress(globalPort, localRouter, &connectedPort,
                              _localDimWidths);
-    dstPort.push_back(connectedPort);
-    ri->localDst = &localRouter;
-    ri->localDstPort = &dstPort;
+    dstPort->push_back(connectedPort);
+    ri->localDst = localRouter;
+    ri->localDstPort = dstPort;
     packet->setRoutingExtension(ri);
   }
 }

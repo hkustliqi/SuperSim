@@ -1,7 +1,7 @@
 {
   "simulator": {
-    "channel_cycle_time": 3,
-    "core_cycle_time": 2,
+    "channel_cycle_time": 1,
+    "core_cycle_time": 1,
     "print_progress": true,
     "print_interval": 1.0,  // seconds
     "random_seed": 12345678
@@ -96,7 +96,7 @@
   },
   "application": {
     "type": "stress_test",
-    "max_injection_rate": 0.90,
+    "max_injection_rate": 0.10,
     "warmup_threshold": 0.99,
     "kill_on_saturation": false,
     "log_during_saturation": false,
