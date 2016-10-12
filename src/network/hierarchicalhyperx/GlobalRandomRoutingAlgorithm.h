@@ -45,7 +45,7 @@ class GlobalRandomRoutingAlgorithm : public RoutingAlgorithm {
 
  private:
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>& _destinationAddress);
+      Flit* _flit, const std::vector<u32>& _destinationAddress) const;
 
   const u32 numVcs_;
   const std::vector<u32> globalDimWidths_;

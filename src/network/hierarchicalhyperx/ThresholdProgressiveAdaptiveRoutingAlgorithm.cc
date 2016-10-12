@@ -179,15 +179,15 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
-    Flit* _flit, const std::vector<u32>& _destinationAddress) {
+    Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();
   u32 globalDimensions = globalDimWidths_.size();
   u32 localDimensions = localDimWidths_.size();
   u32 numRoutersPerGlobalRouter = 1;
-  for (u32 tmp = 0; tmp < localDimensions; tmp++) {
-    numRoutersPerGlobalRouter *= localDimWidths_.at(tmp);
+  for (u32 dim = 0; dim < localDimensions; dim++) {
+    numRoutersPerGlobalRouter *= localDimWidths_.at(dim);
   }
 
   // determine if already at destination virtual global router

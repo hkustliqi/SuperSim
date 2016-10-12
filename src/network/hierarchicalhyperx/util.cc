@@ -25,12 +25,12 @@ void globalPortToLocalAddress
     const std::vector<u32>& _localDimWidths) {
   u32 localDimensions = _localDimWidths.size();
   u32 numRoutersPerGlobalRouter = 1;
-  for (u32 tmp = 0; tmp < localDimensions; tmp++) {
-    numRoutersPerGlobalRouter *= _localDimWidths.at(tmp);
+  for (u32 dim = 0; dim < localDimensions; dim++) {
+    numRoutersPerGlobalRouter *= _localDimWidths.at(dim);
   }
   u32 product = 1;
-  for (u32 tmp = 0; tmp < localDimensions - 1; tmp++) {
-    product *= _localDimWidths.at(tmp);
+  for (u32 dim = 0; dim < localDimensions - 1; dim++) {
+    product *= _localDimWidths.at(dim);
   }
   u32 globalPortCopy = _globalPort;
   for (s32 localDim = localDimensions - 1; localDim >= 0; localDim--) {
@@ -72,9 +72,9 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
   u32 globalDim = _diffGlobalDims.at
     (gSim->rnd.nextU64(0, _diffGlobalDims.size() - 1));
   u32 globalPortBase = 0;
-  for (u32 tmp = 0; tmp < globalDim; tmp++) {
-    globalPortBase += ((_globalDimWidths.at(tmp) - 1)
-                       * _globalDimWeights.at(tmp));
+  for (u32 dim = 0; dim < globalDim; dim++) {
+    globalPortBase += ((_globalDimWidths.at(dim) - 1)
+                       * _globalDimWeights.at(dim));
   }
   // find the right port of the virtual global router
   u32 src = _routerAddress.at(localDimensions + globalDim);

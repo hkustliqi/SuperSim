@@ -48,7 +48,7 @@ class ValiantRoutingAlgorithm : public DimOrderRoutingAlgorithm {
   // the following method and variable are made protected because
   // they will be inherited, such as by Valiants routing
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>& _destinationAddress);
+      Flit* _flit, const std::vector<u32>& _destinationAddress) const;
   const bool randomGroup_;
 };
 

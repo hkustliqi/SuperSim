@@ -96,7 +96,7 @@ void ValiantRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ValiantRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>& _destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();
 

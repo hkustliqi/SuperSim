@@ -120,7 +120,7 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
-    Flit* _flit, const std::vector<u32>& _destinationAddress) {
+    Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   Packet* packet = _flit->getPacket();

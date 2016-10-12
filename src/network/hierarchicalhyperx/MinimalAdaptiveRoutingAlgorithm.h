@@ -47,19 +47,20 @@ class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
 
  private:
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>& _destinationAddress);
+      Flit* _flit, const std::vector<u32>& _destinationAddress) const;
 
-  u32 findHighestPort(const std::unordered_map<u32, f64>& _portAvailability);
+  u32 findHighestPort(const std::unordered_map<u32, f64>&
+                      _portAvailability) const;
 
   void findPortAvailability(
      const std::vector<u32>& _diffDims,
      std::unordered_map<u32, f64>* _portAvailability,
-     const std::vector<u32>& _destinationAddress, Flit* _flit);
+     const std::vector<u32>& _destinationAddress, Flit* _flit) const;
 
   void ifAtLocalDst(
      Flit* _flit, std::unordered_set<u32>* _outputPorts,
      std::vector<u32>* _globalOutputPorts,
-     const std::vector<u32>& diffGlobalDims);
+     const std::vector<u32>& diffGlobalDims) const;
 
   const u32 numVcs_;
   const std::vector<u32> globalDimWidths_;

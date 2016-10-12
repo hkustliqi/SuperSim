@@ -49,7 +49,7 @@ class ThresholdProgressiveAdaptiveRoutingAlgorithm
 
  private:
   std::unordered_set<u32> routing(
-      Flit* _flit, const std::vector<u32>& _destinationAddress);
+      Flit* _flit, const std::vector<u32>& _destinationAddress) const;
 
   const f64 threshold_;
 };

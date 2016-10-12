@@ -100,7 +100,7 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>& _destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& _destinationAddress) const {
     // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   assert(routerAddress.size() == _destinationAddress.size() - 1);
@@ -109,8 +109,8 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
   u32 globalDimensions = globalDimWidths_.size();
   u32 localDimensions = localDimWidths_.size();
   u32 numRoutersPerGlobalRouter = 1;
-  for (u32 tmp = 0; tmp < localDimensions; tmp++) {
-    numRoutersPerGlobalRouter *= localDimWidths_.at(tmp);
+  for (u32 dim = 0; dim < localDimensions; dim++) {
+    numRoutersPerGlobalRouter *= localDimWidths_.at(dim);
   }
 
   // determine if already at destination virtual global router
@@ -212,7 +212,7 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
 }
 
 u32 MinimalAdaptiveRoutingAlgorithm::findHighestPort(
-    const std::unordered_map< u32, f64 >& _portAvailability) {
+    const std::unordered_map< u32, f64 >& _portAvailability) const {
   assert(_portAvailability.size() >= 1);
   f64 highest = 1.0;
   for (auto const& port : _portAvailability) {
@@ -234,7 +234,7 @@ u32 MinimalAdaptiveRoutingAlgorithm::findHighestPort(
 void MinimalAdaptiveRoutingAlgorithm::findPortAvailability(
     const std::vector<u32>& _diffDims,
     std::unordered_map<u32, f64>* _portAvailability,
-    const std::vector<u32>& _destinationAddress, Flit* _flit) {
+    const std::vector<u32>& _destinationAddress, Flit* _flit) const {
   const std::vector<u32>& routerAddress = router_->getAddress();
   for (auto itr = _diffDims.begin(); itr != _diffDims.end(); itr++) {
     u32 src = routerAddress.at(*itr);
@@ -267,7 +267,7 @@ void MinimalAdaptiveRoutingAlgorithm::findPortAvailability(
 void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
   (Flit* _flit, std::unordered_set<u32>* _outputPorts,
     std::vector<u32>* _globalOutputPorts,
-    const std::vector<u32>& _diffGlobalDims) {
+    const std::vector<u32>& _diffGlobalDims) const {
   Packet* packet = _flit->getPacket();
   const std::vector<u32>& routerAddress = router_->getAddress();
   const std::vector<u32>* destinationAddress =

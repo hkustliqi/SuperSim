@@ -93,7 +93,7 @@ void GlobalAndLocalRandomRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
-(Flit* _flit, const std::vector<u32>& _destinationAddress) {
+  (Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->getAddress();
   assert(routerAddress.size() == _destinationAddress.size() - 1);
@@ -103,8 +103,8 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
   u32 globalDimensions = globalDimWidths_.size();
   u32 localDimensions = localDimWidths_.size();
   u32 numRoutersPerGlobalRouter = 1;
-  for (u32 tmp = 0; tmp < localDimensions; tmp++) {
-    numRoutersPerGlobalRouter *= localDimWidths_.at(tmp);
+  for (u32 dim = 0; dim < localDimensions; dim++) {
+    numRoutersPerGlobalRouter *= localDimWidths_.at(dim);
   }
 
   // determine if already at destination virtual global router
@@ -175,9 +175,9 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
       u32 localDim = diffLocalDims.
         at(gSim->rnd.nextU64(0, diffLocalDims.size() - 1));
       u32 portBase = concentration_;
-      for (u32 tmp = 0; tmp < localDim; tmp++) {
-        portBase += ((localDimWidths_.at(tmp) - 1)
-                     * localDimWeights_.at(tmp));
+      for (u32 dim = 0; dim < localDim; dim++) {
+        portBase += ((localDimWidths_.at(dim) - 1)
+                     * localDimWeights_.at(dim));
       }
       // more local router-to-router hops needed
       u32 src = routerAddress.at(localDim);
@@ -219,9 +219,9 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
       u32 localDim = diffLocalDims.
         at(gSim->rnd.nextU64(0, diffLocalDims.size() - 1));
       u32 portBase = concentration_;
-      for (u32 tmp = 0; tmp < localDim; tmp++) {
-        portBase += ((localDimWidths_.at(tmp) - 1)
-                     * localDimWeights_.at(tmp));
+      for (u32 dim = 0; dim < localDim; dim++) {
+        portBase += ((localDimWidths_.at(dim) - 1)
+                     * localDimWeights_.at(dim));
       }
       // more local router-to-router hops needed
       u32 src = routerAddress.at(localDim);
