@@ -9,7 +9,6 @@
   "network": {
     "topology": "hierarchical_hyperx",
     "num_vcs": 16,
-    "hierarchy": 2,
     "global_dimension_widths": [4, 2],
     "global_dimension_weights": [1, 1],
     "local_dimension_widths": [2, 2],
@@ -48,7 +47,7 @@
         "packet_lock": true,
         "idle_unlock": true
       },
-      "init_credits": 160,
+      "init_credits": "$&(network.router.input_queue_depth)&$",
       "crossbar": {
         "latency": 1  // cycles
       }
@@ -60,8 +59,9 @@
         "latency": 1,
         "granularity": 0
       },
-      "input_queue_depth": 160,
+      "input_queue_depth": 16,
       "vca_swa_wait": true,
+      "output_queue_depth": 64,
       "crossbar": {
         "latency": 1  // cycles
       },
@@ -96,9 +96,10 @@
   },
   "application": {
     "type": "stress_test",
-    "max_injection_rate": 0.20,
+    "max_injection_rate": 0.90,
     "warmup_threshold": 0.99,
-    "kill_fast": false,
+    "kill_on_saturation": false,
+    "log_during_saturation": false,
     "blast_terminal": {
       "num_messages": 50,
       "min_message_size": 1,

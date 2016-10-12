@@ -31,9 +31,6 @@ namespace HierarchicalHyperX {
 Network::Network(const std::string& _name, const Component* _parent,
                  MetadataHandler* _metadataHandler, Json::Value _settings)
     : ::Network(_name, _parent, _metadataHandler, _settings) {
-  // hierarchy
-  hierarchy_ = _settings["hierarchy"].asUInt();
-  assert(hierarchy_ >= 1);
   // global dimension
   assert(_settings["global_dimension_widths"].isArray());
   globalDimensions_ = _settings["global_dimension_widths"].size();

@@ -55,7 +55,6 @@ class Network : public ::Network {
   void collectChannels(std::vector<Channel*>* _channels) override;
 
  private:
-  u32 hierarchy_;
   // global hyperX parameters
   u32 globalDimensions_;
   std::vector<u32> globalDimensionWidths_;
