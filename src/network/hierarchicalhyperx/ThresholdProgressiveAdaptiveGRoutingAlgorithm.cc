@@ -79,11 +79,11 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
 
   // reset local dst after switching to Valiant mode in first group
   if (ri->globalHopCount == 0 && ri->valiantMode == true) {
-    std::vector<u32>* localRouter = new std::vector<u32>(localDimensions);
+    std::vector<u32> localRouter(localDimensions);
     for (u32 localDim = 0; localDim < localDimensions; localDim++) {
-      localRouter->at(localDim) = routerAddress.at(localDim);
+      localRouter.at(localDim) = routerAddress.at(localDim);
     }
-    ri->localDst = localRouter;
+    ri->localDst = &localRouter;
     u32 globalPort =  gSim->rnd.nextU64(0, globalLinksPerRouter_ - 1);
     std::vector<u32>* dstPort = new std::vector<u32>;
     dstPort->push_back(globalPort);

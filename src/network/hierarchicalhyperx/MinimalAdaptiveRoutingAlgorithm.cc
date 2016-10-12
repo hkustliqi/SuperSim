@@ -114,13 +114,13 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
   }
 
   // determine if already at destination virtual global router
-  std::vector<u32>* diffGlobalDims = new std::vector<u32>;
-  assert(diffGlobalDims->size() == 0);
+  std::vector<u32> diffGlobalDims;
+  assert(diffGlobalDims.size() == 0);
   bool atGlobalDst = true;
   for (u32 globalDim = 0; globalDim < globalDimensions; globalDim++) {
     if (routerAddress.at(localDimensions + globalDim)
         != _destinationAddress.at(localDimensions + globalDim + 1)) {
-      diffGlobalDims->push_back(globalDim);
+      diffGlobalDims.push_back(globalDim);
       atGlobalDst = false;
     }
   }
@@ -145,7 +145,7 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
   // if at different global router
   if (atGlobalDst == false) {
     if (ri->localDst == nullptr) {
-      setLocalDst(*diffGlobalDims, _destinationAddress, &globalOutputPorts,
+      setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
@@ -156,7 +156,7 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
     // if at local dst
     if (std::equal(localDst->begin(), localDst->end(),
                    routerAddress.begin())) {
-      ifAtLocalDst(_flit, &outputPorts, &globalOutputPorts, *diffGlobalDims);
+      ifAtLocalDst(_flit, &outputPorts, &globalOutputPorts, diffGlobalDims);
       assert(outputPorts.size() > 0);
     } else {
       // determine the local dimension to work on

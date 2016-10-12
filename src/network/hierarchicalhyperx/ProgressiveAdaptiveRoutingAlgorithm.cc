@@ -149,9 +149,9 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
   if (ri->globalHopCount == 0 && globalDim != globalDimensions) {
     // choose a random local dst
     if (ri->localDst == nullptr) {
-      std::vector<u32>* diffGlobalDims = new std::vector<u32>;
-      diffGlobalDims->push_back(globalDim);
-      setLocalDst(*diffGlobalDims, _destinationAddress, &globalOutputPorts,
+      std::vector<u32> diffGlobalDims;
+      diffGlobalDims.push_back(globalDim);
+      setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }

@@ -8,7 +8,7 @@
   },
   "network": {
     "topology": "hierarchical_hyperx",
-    "num_vcs": 14,
+    "num_vcs": 16,
     "hierarchy": 2,
     "global_dimension_widths": [4, 2],
     "global_dimension_weights": [1, 1],

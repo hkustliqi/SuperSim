@@ -105,19 +105,19 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
     // create routing extension header
     //  the extension is a vector with one dummy element then the address of the
     //  intermediate router
-    std::vector<u32>* re = new std::vector<u32>(1 + routerAddress.size());
-    re->at(0) = U32_MAX;  // dummy
+    std::vector<u32> re(1 + routerAddress.size());
+    re.at(0) = U32_MAX;  // dummy
 
     // random intermediate address
     for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
-      re->at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
+      re.at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
     }
     for (u32 idx = 0; idx < globalDimWidths_.size(); idx++) {
-      re->at(idx + localDimWidths_.size() + 1) =
+      re.at(idx + localDimWidths_.size() + 1) =
           gSim->rnd.nextU64(0, globalDimWidths_.at(idx) - 1);
     }
     RoutingInfo* ri = new RoutingInfo();
-    ri->intermediateAddress = re;
+    ri->intermediateAddress = &re;
     ri->localDst = nullptr;
     ri->localDstPort = nullptr;
     ri->localDerouteCount = 0;
@@ -130,18 +130,18 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       packet->getRoutingExtension());
   if (ri->intermediateAddress == nullptr) {
-    std::vector<u32>* re = new std::vector<u32>(1 + routerAddress.size());
-    re->at(0) = U32_MAX;  // dummy
+    std::vector<u32> re(1 + routerAddress.size());
+    re.at(0) = U32_MAX;  // dummy
 
     // random intermediate address
     for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
-      re->at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
+      re.at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
     }
     for (u32 idx = 0; idx < globalDimWidths_.size(); idx++) {
-      re->at(idx + localDimWidths_.size() + 1) =
+      re.at(idx + localDimWidths_.size() + 1) =
           gSim->rnd.nextU64(0, globalDimWidths_.at(idx) - 1);
     }
-    ri->intermediateAddress = re;
+    ri->intermediateAddress = &re;
   }
   // intermediate address info
   const std::vector<u32>* intermediateAddress =
