@@ -20,25 +20,24 @@
 namespace HierarchicalHyperX {
 
 void globalPortToLocalAddress
-  (u32 _globalPort,
-    std::vector<u32>* _localAddress, u32* _localPortWithoutBase,
-    const std::vector<u32>& _localDimWidths) {
+  (u32 _globalPort, std::vector<u32>* _localAddress,
+    u32* _localPortWithoutBase, const std::vector<u32>& _localDimWidths) {
   u32 localDimensions = _localDimWidths.size();
   u32 numRoutersPerGlobalRouter = 1;
   for (u32 dim = 0; dim < localDimensions; dim++) {
     numRoutersPerGlobalRouter *= _localDimWidths.at(dim);
   }
-  u32 product = 1;
+  u32 numNodesInRemainingDims = 1;
   for (u32 dim = 0; dim < localDimensions - 1; dim++) {
-    product *= _localDimWidths.at(dim);
+    numNodesInRemainingDims *= _localDimWidths.at(dim);
   }
   u32 globalPortCopy = _globalPort;
   for (s32 localDim = localDimensions - 1; localDim >= 0; localDim--) {
-    _localAddress->at(localDim) = (globalPortCopy / product)
+    _localAddress->at(localDim) = (globalPortCopy / numNodesInRemainingDims)
         % _localDimWidths.at(localDim);
-    globalPortCopy %= product;
+    globalPortCopy %= numNodesInRemainingDims;
     if (localDim != 0) {
-      product /= _localDimWidths.at(localDim - 1);
+      numNodesInRemainingDims /= _localDimWidths.at(localDim - 1);
     }
   }
   assert(_localAddress->size() == localDimensions);
@@ -56,6 +55,8 @@ u32 getPortBase(u32 _concentration, const std::vector<u32>& _localDimWidths,
   return portBase;
 }
 
+// This function selects a random local destination when current node
+// and final dst are in different groups
 void setLocalDst(const std::vector<u32>& _diffGlobalDims,
                  const std::vector<u32>& _destinationAddress,
                  std::vector<u32>* _globalOutputPorts, Flit* _flit,
