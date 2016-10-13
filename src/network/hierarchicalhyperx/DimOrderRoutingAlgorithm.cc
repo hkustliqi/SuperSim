@@ -84,6 +84,8 @@ void DimOrderRoutingAlgorithm::processRequest
         for (u32 vc = 0; vc < numVcs_; vc++) {
           _response->add(outputPort, vc);
         }
+        // free memeory of routing extension
+        delete reinterpret_cast<RoutingInfo*>(packet->getRoutingExtension());
         packet->setRoutingExtension(nullptr);
       } else {
         // select VCs in the corresponding set
