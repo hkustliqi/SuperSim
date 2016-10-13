@@ -69,7 +69,13 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
         packet->getRoutingExtension());
     ri->globalHopCount++;
     // delete local router
+    if (ri->localDst != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+    }
     ri->localDst = nullptr;
+    if (ri->localDstPort != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+    }
     ri->localDstPort = nullptr;
     // reset deroute
     ri->localDerouteCount = localDeroute_;
@@ -86,6 +92,7 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
       for (u32 vc = 0; vc < numVcs_; vc++) {
         _response->add(outputPort, vc);
       }
+      delete reinterpret_cast<RoutingInfo*>(packet->getRoutingExtension());
       packet->setRoutingExtension(nullptr);
     } else {
       // select VCs in the corresponding set

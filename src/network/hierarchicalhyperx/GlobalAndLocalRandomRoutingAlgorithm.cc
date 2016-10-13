@@ -65,7 +65,13 @@ void GlobalAndLocalRandomRoutingAlgorithm::processRequest(
         packet->getRoutingExtension());
     ri->globalHopCount++;
     // delete local router
+    if (ri->localDst != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+    }
     ri->localDst = nullptr;
+    if (ri->localDstPort != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+    }
     ri->localDstPort = nullptr;
     packet->setRoutingExtension(ri);
   }
@@ -80,6 +86,7 @@ void GlobalAndLocalRandomRoutingAlgorithm::processRequest(
       for (u32 vc = 0; vc < numVcs_; vc++) {
         _response->add(outputPort, vc);
       }
+      delete reinterpret_cast<RoutingInfo*>(packet->getRoutingExtension());
       packet->setRoutingExtension(nullptr);
     } else {
       // select VCs in the corresponding set
@@ -197,7 +204,13 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
   } else {
     // if at the same global virtual router
     // use the regular dimension order routing of HyperX
+    if (ri->localDst != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+    }
     ri->localDst = nullptr;
+    if (ri->localDstPort != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+    }
     ri->localDstPort = nullptr;
     packet->setRoutingExtension(ri);
     // determine the local dimension to work on

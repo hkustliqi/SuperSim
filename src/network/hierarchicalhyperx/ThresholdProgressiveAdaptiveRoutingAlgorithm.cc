@@ -88,7 +88,13 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
                                           localDimWeights_)) {
     ri->globalHopCount++;
     // delete local router
+    if (ri->localDst != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+    }
     ri->localDst = nullptr;
+    if (ri->localDstPort != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+    }
     ri->localDstPort = nullptr;
     packet->setRoutingExtension(ri);
   }
@@ -127,7 +133,13 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
         availability = availability / vcCount;
         if (availability >= threshold_) {
           // reset localdst for valiant
+          if (ri->localDst != nullptr) {
+           delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+          }
           ri->localDst = nullptr;
+          if (ri->localDstPort != nullptr) {
+           delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+          }
           ri->localDstPort = nullptr;
           ri->valiantMode = true;
           packet->setRoutingExtension(ri);
@@ -156,7 +168,13 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
                                             localDimWeights_)) {
       ri->globalHopCount++;
       // delete local router
+      if (ri->localDst != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      }
       ri->localDst = nullptr;
+      if (ri->localDstPort != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      }
       ri->localDstPort = nullptr;
       packet->setRoutingExtension(ri);
     }
@@ -251,7 +269,13 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
       if (outputPorts.size() == 0) {
         ri->valiantMode = true;
         // reset localdst for Valiant
+        if (ri->localDst != nullptr) {
+          delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+        }
         ri->localDst = nullptr;
+        if (ri->localDstPort != nullptr) {
+          delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+        }
         ri->localDstPort = nullptr;
         packet->setRoutingExtension(ri);
         outputPorts = ValiantRoutingAlgorithm::routing(
