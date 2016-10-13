@@ -110,6 +110,8 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
       dstPort->push_back(connectedPort);
       ri->localDstPort = dstPort;
       packet->setRoutingExtension(ri);
+    } else {
+      delete localRouter;
     }
   }
   // if no global link, pick a random one
@@ -123,6 +125,7 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
     u32 connectedPort;
     globalPortToLocalAddress(globalPort, localRouter, &connectedPort,
                              _localDimWidths);
+
     dstPort->push_back(connectedPort);
     ri->localDst = localRouter;
     ri->localDstPort = dstPort;

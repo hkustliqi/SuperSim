@@ -64,7 +64,13 @@ void DimOrderRoutingAlgorithm::processRequest
         (packet->getRoutingExtension());
       ri->globalHopCount++;
       // delete local router
+      if (ri->localDst != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      }
       ri->localDst = nullptr;
+      if (ri->localDstPort != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      }
       ri->localDstPort = nullptr;
       packet->setRoutingExtension(ri);
     }
@@ -190,7 +196,13 @@ std::unordered_set<u32> DimOrderRoutingAlgorithm::routing
     } else {
       // if at the same global virtual router
       // use the regular dimension order routing of HyperX
+      if (ri->localDst != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      }
       ri->localDst = nullptr;
+      if (ri->localDstPort != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      }
       ri->localDstPort = nullptr;
       packet->setRoutingExtension(ri);
       // determine the next local dimension to work on
