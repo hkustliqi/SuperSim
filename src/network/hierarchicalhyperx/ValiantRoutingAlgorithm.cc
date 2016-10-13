@@ -63,7 +63,12 @@ void ValiantRoutingAlgorithm::processRequest(
     }
     assert(_response->size() > 0);
     // delete the routing extension
-    delete reinterpret_cast<RoutingInfo*>(packet->getRoutingExtension());
+    RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
+        packet->getRoutingExtension());
+    delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+    delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+    delete reinterpret_cast<const std::vector<u32>*>(ri->intermediateAddress);
+    delete ri;
     packet->setRoutingExtension(nullptr);
   } else {
     std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
@@ -112,19 +117,19 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
     // create routing extension header
     //  the extension is a vector with one dummy element then the address of the
     //  intermediate router
-    std::vector<u32> re(1 + routerAddress.size());
-    re.at(0) = U32_MAX;  // dummy
+    std::vector<u32>* re = new std::vector<u32>(1 + routerAddress.size());
+    re->at(0) = U32_MAX;  // dummy
 
     // random intermediate address
     for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
-      re.at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
+      re->at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
     }
     for (u32 idx = 0; idx < globalDimWidths_.size(); idx++) {
-      re.at(idx + localDimWidths_.size() + 1) =
+      re->at(idx + localDimWidths_.size() + 1) =
           gSim->rnd.nextU64(0, globalDimWidths_.at(idx) - 1);
     }
     RoutingInfo* ri = new RoutingInfo();
-    ri->intermediateAddress = &re;
+    ri->intermediateAddress = re;
     ri->localDst = nullptr;
     ri->localDstPort = nullptr;
     ri->localDerouteCount = 0;
@@ -154,12 +159,6 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
   const std::vector<u32>* intermediateAddress =
       reinterpret_cast<const std::vector<u32>*>(ri->intermediateAddress);
   assert(routerAddress.size() == _destinationAddress.size() - 1);
-  for (u32 i=0; i < intermediateAddress->size(); i++) {
-    printf("inter add = %u  ", intermediateAddress->at(i));
-  }
-  printf("\n");
-  printf("inter add size = %u  \n", intermediateAddress->size());
-  printf("router size = %u  \n", routerAddress.size());
   assert(routerAddress.size() == intermediateAddress->size() - 1);
 
   // update intermediate info for Valiant

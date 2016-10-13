@@ -28,7 +28,7 @@
       "file": "/dev/null"  // "channels.csv"
     },
     "routing": {
-      "algorithm": "valiant",
+      "algorithm": "dimension_order",
       "latency": 1
     },
     "interface": {

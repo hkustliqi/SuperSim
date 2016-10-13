@@ -28,9 +28,9 @@
 namespace HierarchicalHyperX {
 
 struct RoutingInfo {
-  void* intermediateAddress;
-  void* localDst;
-  void* localDstPort;
+  std::vector<u32>* intermediateAddress;
+  std::vector<u32>* localDst;
+  std::vector<u32>* localDstPort;
   u32 localDerouteCount;
   u32 globalHopCount;
   bool intermediateDone;
