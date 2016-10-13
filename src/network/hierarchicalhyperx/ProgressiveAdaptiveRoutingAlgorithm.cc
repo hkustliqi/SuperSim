@@ -113,6 +113,9 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       }
       assert(_response->size() > 0);
       // delete the routing extension
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->intermediateAddress);
       delete ri;
       packet->setRoutingExtension(nullptr);
     } else {
@@ -175,11 +178,9 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::advance(MINIt, MINRandom);
     int MINOutputPort = *(MINIt);
     f64 MINAvailability = 0.0;
-    u32 MINVcCount = 0;
     for (u32 vc = packet->getHopCount() - 1; vc < numVcs_;
          vc += 2 * localDimensions + 2 * globalDimensions) {
       MINAvailability += router_->congestionStatus(MINOutputPort, vc);
-      MINVcCount++;
     }
     int VALOutputSize = VALOutputPorts.size();
     assert(VALOutputSize > 0);
@@ -188,11 +189,9 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::advance(VALIt, VALRandom);
     int VALOutputPort = *(VALIt);
     f64 VALAvailability = 0.0;
-    u32 VALVcCount = 0;
     for (u32 vc = packet->getHopCount() - 1; vc < numVcs_;
          vc += 2 * localDimensions + 2 * globalDimensions) {
       VALAvailability += router_->congestionStatus(VALOutputPort, vc);
-      VALVcCount++;
     }
     // UGAL
     if (MINAvailability <= 2 * VALAvailability) {
