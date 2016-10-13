@@ -49,7 +49,7 @@ class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress) const;
 
-  u32 findHighestPort(const std::unordered_map<u32, f64>&
+  u32 findMostAvailablePort(const std::unordered_map<u32, f64>&
                       _portAvailability) const;
 
   void findPortAvailability(

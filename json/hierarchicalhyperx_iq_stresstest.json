@@ -28,8 +28,10 @@
       "file": "/dev/null"  // "channels.csv"
     },
     "routing": {
-      "algorithm": "dimension_order",
-      "latency": 1
+      "algorithm": "min_adaptive",
+      "latency": 1,
+      "congestion_threshold": 0.3,
+      "num_local_deroute": 1
     },
     "interface": {
       "type": "standard",

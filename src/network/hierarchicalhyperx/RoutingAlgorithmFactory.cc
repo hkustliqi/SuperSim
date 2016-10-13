@@ -43,7 +43,7 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
   u32 latency = settings_["latency"].asUInt();
   bool randomGroup = settings_["random_group"].asBool();
   f64 congestionThreshold = settings_["congestion_threshold"].asFloat();
-  u32 localDetour = settings_["local_detour"].asUInt();
+  u32 localDetour = settings_["num_local_deroute"].asUInt();
 
   if (algorithm == "dimension_order") {
     return new HierarchicalHyperX::DimOrderRoutingAlgorithm(

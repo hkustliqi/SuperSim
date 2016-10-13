@@ -92,7 +92,13 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
       for (u32 vc = 0; vc < numVcs_; vc++) {
         _response->add(outputPort, vc);
       }
-      delete reinterpret_cast<RoutingInfo*>(packet->getRoutingExtension());
+      RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
+       packet->getRoutingExtension());
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      delete reinterpret_cast<const std::vector<u32>*>(
+        ri->intermediateAddress);
+      delete ri;
       packet->setRoutingExtension(nullptr);
     } else {
       // select VCs in the corresponding set
@@ -177,7 +183,7 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
       findPortAvailability(diffLocalDims, &portAvailability, *localDst,
                            _flit);
       // find the port with max availability
-      u32 highestPort = findHighestPort(portAvailability);
+      u32 highestPort = findMostAvailablePort(portAvailability);
       bool res = outputPorts.insert(highestPort).second;
       (void)res;
       assert(res);
@@ -207,7 +213,7 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
                                  _destinationAddress.end());
       findPortAvailability(diffDims, &portAvailability, dstRouter, _flit);
       // find the port with max availability
-      u32 availablePort = findHighestPort(portAvailability);
+      u32 availablePort = findMostAvailablePort(portAvailability);
 
       bool res = outputPorts.insert(availablePort).second;
       (void)res;
@@ -218,24 +224,26 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
   return outputPorts;
 }
 
-u32 MinimalAdaptiveRoutingAlgorithm::findHighestPort(
+// status: 0 = empty, 1 = fully congested
+u32 MinimalAdaptiveRoutingAlgorithm::findMostAvailablePort(
     const std::unordered_map< u32, f64 >& _portAvailability) const {
   assert(_portAvailability.size() >= 1);
-  f64 highest = 1.0;
+  f64 lowest = INT_MAX;
   for (auto const& port : _portAvailability) {
-    if (port.second <= highest) {
-      highest = port.second;
+    if (port.second <= lowest) {
+      lowest = port.second;
     }
   }
   // break tie with random selection
-  std::vector<u32> highestPorts;
+  std::vector<u32> potentialPorts;
   for (auto const& port : _portAvailability) {
-    if (port.second == highest) {
-      highestPorts.push_back(port.first);
+    if (port.second == lowest) {
+      potentialPorts.push_back(port.first);
     }
   }
-  u32 rnd = gSim->rnd.nextU64(0, highestPorts.size() - 1);
-  return highestPorts.at(rnd);
+  assert(potentialPorts.size() > 0);
+  u32 rnd = gSim->rnd.nextU64(0, potentialPorts.size() - 1);
+  return potentialPorts.at(rnd);
 }
 
 void MinimalAdaptiveRoutingAlgorithm::findPortAvailability(
@@ -317,6 +325,15 @@ void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
     // can deroute and ports all congested
     if (_outputPorts->size() == 0 && ri->localDerouteCount > 0) {
       _globalOutputPorts->clear();
+      // delete previous local dst ptr
+      if (ri->localDst != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      }
+      ri->localDst = nullptr;
+      if (ri->localDstPort != nullptr) {
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      }
+      ri->localDstPort = nullptr;
       setLocalDst(_diffGlobalDims, *destinationAddress, _globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
@@ -339,7 +356,7 @@ void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
         findPortAvailability(diffLocalDims, &portAvailability, *localDst,
                              _flit);
         // find the port with max availability
-        u32 highestPort = findHighestPort(portAvailability);
+        u32 highestPort = findMostAvailablePort(portAvailability);
         bool res = _outputPorts->insert(highestPort).second;
         (void)res;
         assert(res);

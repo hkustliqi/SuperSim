@@ -85,7 +85,13 @@ void DimOrderRoutingAlgorithm::processRequest
           _response->add(outputPort, vc);
         }
         // free memeory of routing extension
-        delete reinterpret_cast<RoutingInfo*>(packet->getRoutingExtension());
+        RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
+          packet->getRoutingExtension());
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+        delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+        delete reinterpret_cast<const std::vector<u32>*>(
+          ri->intermediateAddress);
+        delete ri;
         packet->setRoutingExtension(nullptr);
       } else {
         // select VCs in the corresponding set
