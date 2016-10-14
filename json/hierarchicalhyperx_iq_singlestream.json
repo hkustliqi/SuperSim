@@ -28,7 +28,7 @@
       "file": "/dev/null"  // "channels.csv"
     },
     "routing": {
-      "algorithm": "dimension_order",
+      "algorithm": "valiant",
       "latency": 1
     },
     "interface": {
@@ -95,36 +95,25 @@
     }
   },
   "application": {
-    "type": "stress_test",
-    "max_injection_rate": 0.10,
-    "warmup_threshold": 0.99,
-    "kill_on_saturation": false,
-    "log_during_saturation": false,
-    "blast_terminal": {
-      "num_messages": 50,
+    "type": "single_stream",
+    "max_injection_rate": 1.0,
+    "terminal": {
+      "num_messages": 1,
       "min_message_size": 1,
       "max_message_size": 64,
-      "max_packet_size": 16,
-      "warmup_interval": 200,  // delivered flits
-      "warmup_window": 15,
-      "warmup_attempts": 50,
-      "traffic_pattern": {
-        "type": "uniform_random",
-        "send_to_self": false
-      }
+      "max_packet_size": 16
     },
     "message_log": {
       "file": "/dev/null"  // "data.mpf.gz"
     },
     "rate_log": {
       "file": "/dev/null"  // "rates.csv"
-    }
+    },
+    "source_terminal": 0,  // < 0 is random
+    "destination_terminal": 1  // < 0 is random
   },
   "metadata_handler": {
     "type": "zero"
   },
-  "debug": [
-    "Application",
-    "Application.BlastTerminal_17"
-  ]
+  "debug": []
 }

@@ -117,6 +117,10 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
       }
       assert(_response->size() > 0);
       // delete the routing extension
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      delete reinterpret_cast<const std::vector<u32>*>(
+        ri->intermediateAddress);
       delete ri;
       packet->setRoutingExtension(nullptr);
     } else {
