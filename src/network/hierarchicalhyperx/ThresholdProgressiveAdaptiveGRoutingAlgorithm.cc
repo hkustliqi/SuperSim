@@ -79,19 +79,16 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
 
   // reset local dst after switching to Valiant mode in first group
   if (ri->globalHopCount == 0 && ri->valiantMode == true) {
-    std::vector<u32> localRouter(localDimensions);
     for (u32 localDim = 0; localDim < localDimensions; localDim++) {
-      localRouter.at(localDim) = routerAddress.at(localDim);
+      ri->localDst->at(localDim) = routerAddress.at(localDim);
     }
-    ri->localDst = &localRouter;
     u32 globalPort =  gSim->rnd.nextU64(0, globalLinksPerRouter_ - 1);
-    std::vector<u32>* dstPort = new std::vector<u32>;
-    dstPort->push_back(globalPort);
-    ri->localDstPort = dstPort;
+    ri->localDstPort->clear();
+    ri->localDstPort->push_back(globalPort);
     packet->setRoutingExtension(ri);
 
-    for (auto itr = dstPort->begin();
-         itr != dstPort->end(); itr++) {
+    for (auto itr = ri->localDstPort->begin();
+         itr != ri->localDstPort->end(); itr++) {
       u32 portBase = getPortBase(concentration_, localDimWidths_,
                                  localDimWeights_);
       bool res = outputPorts.insert(portBase + *itr).second;
@@ -179,9 +176,9 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
   if (ri->globalHopCount == 0 && globalDim != globalDimensions) {
     // choose a random local dst
     if (ri->localDst == nullptr) {
-      std::vector<u32>* diffGlobalDims = new std::vector<u32>;
-      diffGlobalDims->push_back(globalDim);
-      setLocalDst(*diffGlobalDims, _destinationAddress, &globalOutputPorts,
+      std::vector<u32> diffGlobalDims;
+      diffGlobalDims.push_back(globalDim);
+      setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
                   _flit, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
@@ -205,22 +202,15 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
           for (u32 vc = packet->getHopCount() - 1; vc < numVcs_;
                vc += localDimWidths_.size() * (globalDimWidths_.size() + 1) + 1
                    + globalDimWidths_.size() + 1 + 1) {
-            // u32 vcIdx = router_->vcIndex(outputPort, vc);
             f64 vcStatus = router_->congestionStatus(outputPort, vc);
             availability += vcStatus;
             vcCount++;
           }
           availability = availability / vcCount;
+          // availabitlity = 1 means fully congested
+          // this means the global link shouldn't be used
           if (availability >= threshold_) {
-            // reset localdst for valiant
-            if (ri->localDst != nullptr) {
-              delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
-            }
-            ri->localDst = nullptr;
-            if (ri->localDstPort != nullptr) {
-             delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
-            }
-            ri->localDstPort = nullptr;
+            // switch to valiant
             ri->valiantMode = true;
             packet->setRoutingExtension(ri);
             // pick a random local port

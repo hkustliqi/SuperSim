@@ -28,10 +28,9 @@
       "file": "/dev/null"  // "channels.csv"
     },
     "routing": {
-      "algorithm": "progressive_adaptive",
+      "algorithm": "threshold_progressive_adaptive_g",
       "latency": 1,
-      "congestion_threshold": 0.3,
-      "num_local_deroute": 1
+      "congestion_threshold": 0.3
     },
     "interface": {
       "type": "standard",

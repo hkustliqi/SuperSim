@@ -15,6 +15,8 @@
  */
 #include "network/hierarchicalhyperx/util.h"
 
+#include <strop/strop.h>
+
 #include <cassert>
 
 namespace HierarchicalHyperX {
