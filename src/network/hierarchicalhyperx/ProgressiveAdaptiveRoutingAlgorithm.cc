@@ -29,16 +29,16 @@
 namespace HierarchicalHyperX {
 
 ProgressiveAdaptiveRoutingAlgorithm::ProgressiveAdaptiveRoutingAlgorithm(
-    const std::string& _name, const Component* _parent, u64 _latency,
-    Router* _router, u32 _numVcs,
+    const std::string& _name, const Component* _parent, Router* _router,
+    u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter)
     : ValiantRoutingAlgorithm
-      (_name, _parent,
-       _latency, _router, _numVcs, _globalDimensionWidths,
+      (_name, _parent,  _router, _latency, _baseVc, _numVcs,
+       _globalDimensionWidths,
        _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
        _concentration, _globalLinksPerRouter, true) {
   assert(numVcs_ >= 2 * localDimWidths_.size() + 2 * globalDimWidths_.size());
@@ -50,8 +50,8 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
     Flit* _flit, RoutingAlgorithm::Response* _response) {
   // ex: [c,1,...,m,1,...,n]
   const std::vector<u32>* destinationAddress =
-      _flit->getPacket()->getMessage()->getDestinationAddress();
-  Packet* packet = _flit->getPacket();
+      _flit->packet()->message()->getDestinationAddress();
+  Packet* packet = _flit->packet();
 
   if (packet->getRoutingExtension() == nullptr) {
     RoutingInfo* ri = new RoutingInfo();
@@ -108,7 +108,7 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
   for (auto it = outputPorts.cbegin(); it != outputPorts.cend(); ++it) {
     u32 outputPort = *it;
     if (outputPort < concentration_) {
-      for (u32 vc = 0; vc < numVcs_; vc++) {
+      for (u32 vc = baseVc_; vc < baseVc_ + numVcs_; vc++) {
         _response->add(outputPort, vc);
       }
       assert(_response->size() > 0);
@@ -119,7 +119,8 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       delete ri;
       packet->setRoutingExtension(nullptr);
     } else {
-      for (u32 vc = vcSet; vc < numVcs_; vc += 2 * localDimWidths_.size()
+      for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
+           vc += 2 * localDimWidths_.size()
                + 2 * globalDimWidths_.size()) {
         _response->add(outputPort, vc);
       }
@@ -131,8 +132,8 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
 std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
-  const std::vector<u32>& routerAddress = router_->getAddress();
-  Packet* packet = _flit->getPacket();
+  const std::vector<u32>& routerAddress = router_->address();
+  Packet* packet = _flit->packet();
   u32 globalDimensions = globalDimWidths_.size();
   u32 localDimensions = localDimWidths_.size();
 

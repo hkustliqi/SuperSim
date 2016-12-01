@@ -28,22 +28,22 @@
 namespace HierarchicalHyperX {
 
 DimOrderRoutingAlgorithm::DimOrderRoutingAlgorithm
-  (const std::string& _name, const Component* _parent, u64 _latency,
-    Router* _router, u32 _numVcs,
+  (const std::string& _name, const Component* _parent,
+    Router* _router, u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter)
-    : RoutingAlgorithm(_name, _parent, _router, _latency),
-      numVcs_(_numVcs), globalDimWidths_(_globalDimensionWidths),
+    : RoutingAlgorithm(_name, _parent, _router, _latency,
+                       _baseVc, _numVcs),
+      globalDimWidths_(_globalDimensionWidths),
       globalDimWeights_(_globalDimensionWeights),
       localDimWidths_(_localDimensionWidths),
       localDimWeights_(_localDimensionWeights),
       concentration_(_concentration),
       globalLinksPerRouter_(_globalLinksPerRouter) {
-    assert(numVcs_ >=  (globalDimWidths_.size() + 1)
-           * localDimWidths_.size() + globalDimWidths_.size());
+    assert(numVcs_ >= globalDimWidths_.size() + 1);
   }
 
 DimOrderRoutingAlgorithm::~DimOrderRoutingAlgorithm() {}
@@ -52,8 +52,8 @@ void DimOrderRoutingAlgorithm::processRequest
   (Flit* _flit, RoutingAlgorithm::Response* _response) {
     // ex: [c,1,...,m,1,...,n]
     const std::vector<u32>* destinationAddress =
-      _flit->getPacket()->getMessage()->getDestinationAddress();
-    Packet* packet = _flit->getPacket();
+      _flit->packet()->message()->getDestinationAddress();
+    Packet* packet = _flit->packet();
     // perform routing
     std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
     assert(outputPorts.size() >= 1);
@@ -75,13 +75,15 @@ void DimOrderRoutingAlgorithm::processRequest
       packet->setRoutingExtension(ri);
     }
     // figure out which VC set to use
-    u32 vcSet = packet->getHopCount() - 1;
+    RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
+      packet->getRoutingExtension());
+    u32 vcSet = ri->globalHopCount;
 
     // format the response
     for (auto it = outputPorts.cbegin(); it != outputPorts.cend(); ++it) {
       u32 outputPort = *it;
       if (outputPort < concentration_) {
-        for (u32 vc = 0; vc < numVcs_; vc++) {
+        for (u32 vc = baseVc_; vc < baseVc_ + numVcs_; vc++) {
           _response->add(outputPort, vc);
         }
         // free memeory of routing extension
@@ -95,8 +97,8 @@ void DimOrderRoutingAlgorithm::processRequest
         packet->setRoutingExtension(nullptr);
       } else {
         // select VCs in the corresponding set
-        for (u32 vc = vcSet; vc < numVcs_; vc += (globalDimWidths_.size() + 1)
-               * localDimWidths_.size() + globalDimWidths_.size()) {
+        for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
+             vc += globalDimWidths_.size() + 1) {
           _response->add(outputPort, vc);
         }
       }
@@ -107,10 +109,10 @@ void DimOrderRoutingAlgorithm::processRequest
 std::unordered_set<u32> DimOrderRoutingAlgorithm::routing
   (Flit* _flit, const std::vector<u32>& _destinationAddress) const {
     // ex: [1,...,m,1,...,n]
-    const std::vector<u32>& routerAddress = router_->getAddress();
+    const std::vector<u32>& routerAddress = router_->address();
     assert(routerAddress.size() == _destinationAddress.size() - 1);
 
-    Packet* packet = _flit->getPacket();
+    Packet* packet = _flit->packet();
     u32 globalDimensions = globalDimWidths_.size();
     u32 localDimensions = localDimWidths_.size();
     u32 numRoutersPerGlobalRouter = 1;

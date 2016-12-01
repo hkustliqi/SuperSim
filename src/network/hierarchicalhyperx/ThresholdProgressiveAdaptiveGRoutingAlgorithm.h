@@ -32,8 +32,8 @@ class ThresholdProgressiveAdaptiveGRoutingAlgorithm : public
 DimOrderRoutingAlgorithm {
  public:
   ThresholdProgressiveAdaptiveGRoutingAlgorithm(
-    const std::string& _name, const Component* _parent,
-    u64 _latency, Router* _router, u32 _numVcs,
+    const std::string& _name, const Component* _parent, Router* _router,
+    u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,

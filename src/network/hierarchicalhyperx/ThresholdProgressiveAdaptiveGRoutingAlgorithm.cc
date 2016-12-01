@@ -31,16 +31,16 @@ namespace HierarchicalHyperX {
 
 ThresholdProgressiveAdaptiveGRoutingAlgorithm::
   ThresholdProgressiveAdaptiveGRoutingAlgorithm(
-    const std::string& _name, const Component* _parent, u64 _latency,
-    Router* _router, u32 _numVcs,
+    const std::string& _name, const Component* _parent, Router* _router,
+    u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
     f64 _threshold)
-  : DimOrderRoutingAlgorithm
-    (_name, _parent, _latency, _router, _numVcs, _globalDimensionWidths,
+  : DimOrderRoutingAlgorithm(_name, _parent, _router,
+     _latency, _baseVc, _numVcs, _globalDimensionWidths,
      _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
      _concentration, _globalLinksPerRouter), threshold_(_threshold) {
   // every VC per hop
@@ -56,9 +56,9 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
     Flit* _flit, RoutingAlgorithm::Response* _response) {
   // ex: [c,1,...,m,1,...,n]
   const std::vector<u32>* destinationAddress =
-      _flit->getPacket()->getMessage()->getDestinationAddress();
-  const std::vector<u32>& routerAddress = router_->getAddress();
-  Packet* packet = _flit->getPacket();
+      _flit->packet()->message()->getDestinationAddress();
+  const std::vector<u32>& routerAddress = router_->address();
+  Packet* packet = _flit->packet();
   u32 localDimensions = localDimWidths_.size();
 
   std::unordered_set<u32> outputPorts;
@@ -126,14 +126,15 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
   for (auto it = outputPorts.cbegin(); it != outputPorts.cend(); ++it) {
     u32 outputPort = *it;
     if (outputPort < concentration_) {
-      for (u32 vc = 0; vc < numVcs_; vc++) {
+      for (u32 vc = baseVc_; vc < baseVc_ + numVcs_; vc++) {
         _response->add(outputPort, vc);
       }
       assert(_response->size() > 0);
       delete ri;
       packet->setRoutingExtension(nullptr);
     } else {
-      for (u32 vc = vcSet; vc < numVcs_; vc += localDimWidths_.size()
+      for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
+           vc += localDimWidths_.size()
                * (globalDimWidths_.size() + 1) + 1
                + globalDimWidths_.size() + 1 + 1) {
         _response->add(outputPort, vc);
@@ -146,8 +147,8 @@ void ThresholdProgressiveAdaptiveGRoutingAlgorithm::processRequest(
 std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
     Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
-  const std::vector<u32>& routerAddress = router_->getAddress();
-  Packet* packet = _flit->getPacket();
+  const std::vector<u32>& routerAddress = router_->address();
+  Packet* packet = _flit->packet();
   u32 globalDimensions = globalDimWidths_.size();
   u32 localDimensions = localDimWidths_.size();
   u32 numRoutersPerGlobalRouter = 1;

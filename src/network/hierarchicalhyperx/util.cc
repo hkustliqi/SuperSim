@@ -67,7 +67,7 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
                  const std::vector<u32>& _globalDimWidths,
                  const std::vector<u32>& _globalDimWeights) {
   u32 localDimensions = _localDimWidths.size();
-  Packet* packet = _flit->getPacket();
+  Packet* packet = _flit->packet();
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       packet->getRoutingExtension());
 

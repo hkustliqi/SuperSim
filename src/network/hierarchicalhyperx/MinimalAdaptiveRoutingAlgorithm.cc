@@ -30,16 +30,16 @@
 namespace HierarchicalHyperX {
 
 MinimalAdaptiveRoutingAlgorithm::MinimalAdaptiveRoutingAlgorithm(
-    const std::string& _name, const Component* _parent, u64 _latency,
-    Router* _router, u32 _numVcs,
+    const std::string& _name, const Component* _parent, Router* _router,
+    u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
     f64 _threshold, u32 _localDeroute)
-    : RoutingAlgorithm(_name, _parent, _router, _latency),
-      numVcs_(_numVcs), globalDimWidths_(_globalDimensionWidths),
+    : RoutingAlgorithm(_name, _parent, _router, _latency, _baseVc, _numVcs),
+      globalDimWidths_(_globalDimensionWidths),
       globalDimWeights_(_globalDimensionWeights),
       localDimWidths_(_localDimensionWidths),
       localDimWeights_(_localDimensionWeights),
@@ -56,8 +56,8 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
     Flit* _flit, RoutingAlgorithm::Response* _response) {
   // ex: [c,1,...,m,1,...,n]
   const std::vector<u32>* destinationAddress =
-      _flit->getPacket()->getMessage()->getDestinationAddress();
-  Packet* packet = _flit->getPacket();
+    _flit->packet()->message()->getDestinationAddress();
+  Packet* packet = _flit->packet();
 
   // perform routing
   std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
@@ -83,13 +83,13 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
   }
 
   // figure out which VC set to use
-  u32 vcSet = _flit->getPacket()->getHopCount() - 1;
+  u32 vcSet = _flit->packet()->getHopCount() - 1;
 
   // format the response
   for (auto it = outputPorts.cbegin(); it != outputPorts.cend(); ++it) {
     u32 outputPort = *it;
     if (outputPort < concentration_) {
-      for (u32 vc = 0; vc < numVcs_; vc++) {
+      for (u32 vc = baseVc_; vc < baseVc_ + numVcs_; vc++) {
         _response->add(outputPort, vc);
       }
       RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
@@ -102,7 +102,8 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
       packet->setRoutingExtension(nullptr);
     } else {
       // select VCs in the corresponding set
-      for (u32 vc = vcSet; vc < numVcs_; vc += (globalDimWidths_.size() + 1)
+      for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
+           vc += (globalDimWidths_.size() + 1)
                * localDimWidths_.size() * (1 + localDeroute_)
                + globalDimWidths_.size()) {
         _response->add(outputPort, vc);
@@ -115,10 +116,10 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
 std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
   (Flit* _flit, const std::vector<u32>& _destinationAddress) const {
     // ex: [1,...,m,1,...,n]
-  const std::vector<u32>& routerAddress = router_->getAddress();
+  const std::vector<u32>& routerAddress = router_->address();
   assert(routerAddress.size() == _destinationAddress.size() - 1);
 
-  Packet* packet = _flit->getPacket();
+  Packet* packet = _flit->packet();
   u32 globalDimensions = globalDimWidths_.size();
   u32 localDimensions = localDimWidths_.size();
   u32 numRoutersPerGlobalRouter = 1;
@@ -250,7 +251,7 @@ void MinimalAdaptiveRoutingAlgorithm::findPortAvailability(
     const std::vector<u32>& _diffDims,
     std::unordered_map<u32, f64>* _portAvailability,
     const std::vector<u32>& _destinationAddress, Flit* _flit) const {
-  const std::vector<u32>& routerAddress = router_->getAddress();
+  const std::vector<u32>& routerAddress = router_->address();
   for (auto itr = _diffDims.begin(); itr != _diffDims.end(); itr++) {
     u32 src = routerAddress.at(*itr);
     u32 dst = _destinationAddress.at(*itr);
@@ -267,7 +268,7 @@ void MinimalAdaptiveRoutingAlgorithm::findPortAvailability(
     for (u32 weight = 0; weight < localDimWeights_.at(*itr); weight++) {
       u32 port = portBase + offset + weight;
       f64 availability = 0.0;
-      for (u32 vc = _flit->getPacket()->getHopCount() - 1; vc < numVcs_;
+      for (u32 vc = _flit->packet()->getHopCount() - 1; vc < numVcs_;
            vc += (globalDimWidths_.size() + 1)
                * localDimWidths_.size() * (1 + localDeroute_)
                + globalDimWidths_.size()) {
@@ -283,10 +284,10 @@ void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
   (Flit* _flit, std::unordered_set<u32>* _outputPorts,
     std::vector<u32>* _globalOutputPorts,
     const std::vector<u32>& _diffGlobalDims) const {
-  Packet* packet = _flit->getPacket();
-  const std::vector<u32>& routerAddress = router_->getAddress();
+  Packet* packet = _flit->packet();
+  const std::vector<u32>& routerAddress = router_->address();
   const std::vector<u32>* destinationAddress =
-      _flit->getPacket()->getMessage()->getDestinationAddress();
+      _flit->packet()->message()->getDestinationAddress();
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       packet->getRoutingExtension());
 
@@ -306,7 +307,7 @@ void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
          itr != localDstPort->end(); itr++) {
       f64 availability = 0.0;
       u32 vcCount = 0;
-      for (u32 vc = _flit->getPacket()->getHopCount(); vc < numVcs_;
+      for (u32 vc = _flit->packet()->getHopCount(); vc < numVcs_;
            vc += (globalDimWidths_.size() + 1)
                * localDimWidths_.size() * (1 + localDeroute_)
                + globalDimWidths_.size()) {

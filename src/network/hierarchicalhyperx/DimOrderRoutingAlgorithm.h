@@ -30,8 +30,8 @@ namespace HierarchicalHyperX {
 class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
  public:
   DimOrderRoutingAlgorithm(const std::string& _name,
-                           const Component* _parent,
-                           u64 _latency, Router* _router, u32 _numVcs,
+                           const Component* _parent, Router* _router,
+                           u64 _latency, u32 _baseVc, u32 _numVcs,
                            const std::vector<u32>& _globalDimensionWidths,
                            const std::vector<u32>& _globalDimensionWeights,
                            const std::vector<u32>& _localDimensionWidths,
@@ -48,7 +48,6 @@ class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress) const;
 
-  const u32 numVcs_;
   const std::vector<u32> globalDimWidths_;
   const std::vector<u32> globalDimWeights_;
   const std::vector<u32> localDimWidths_;

@@ -39,7 +39,7 @@ namespace HierarchicalHyperX {
 
 class RoutingAlgorithmFactory : public ::RoutingAlgorithmFactory {
  public:
-  RoutingAlgorithmFactory(u32 _numVcs,
+  RoutingAlgorithmFactory(u32 _baseVc, u32 _numVcs,
                           const std::vector<u32>& _globalDimensionWidths,
                           const std::vector<u32>& _globalDimensionWeights,
                           const std::vector<u32>& _localDimensionWidths,
@@ -54,6 +54,7 @@ class RoutingAlgorithmFactory : public ::RoutingAlgorithmFactory {
       u32 _inputPort);
 
  private:
+  const u32 baseVc_;
   const u32 numVcs_;
   const std::vector<u32> globalDimensionWidths_;
   const std::vector<u32> globalDimensionWeights_;

@@ -30,8 +30,8 @@ namespace HierarchicalHyperX {
 
 ThresholdProgressiveAdaptiveRoutingAlgorithm::
 ThresholdProgressiveAdaptiveRoutingAlgorithm(
-    const std::string& _name, const Component* _parent, u64 _latency,
-    Router* _router, u32 _numVcs,
+    const std::string& _name, const Component* _parent, Router* _router,
+    u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
@@ -39,8 +39,8 @@ ThresholdProgressiveAdaptiveRoutingAlgorithm(
     u32 _concentration, u32 _globalLinksPerRouter,
     f64 _threshold, bool _randomGroup)
   : ValiantRoutingAlgorithm
-    (_name, _parent, _latency, _router, _numVcs, _globalDimensionWidths,
-     _globalDimensionWeights, _localDimensionWidths,
+    (_name, _parent, _router, _latency, _baseVc, _numVcs,
+     _globalDimensionWidths, _globalDimensionWeights, _localDimensionWidths,
      _localDimensionWeights, _concentration, _globalLinksPerRouter,
      _randomGroup), threshold_(_threshold) {
   assert(numVcs_ >= 2 * localDimWidths_.size() + 2 * globalDimWidths_.size());
@@ -53,8 +53,8 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
     Flit* _flit, RoutingAlgorithm::Response* _response) {
   // ex: [c,1,...,m,1,...,n]
   const std::vector<u32>* destinationAddress =
-      _flit->getPacket()->getMessage()->getDestinationAddress();
-  Packet* packet = _flit->getPacket();
+    _flit->packet()->message()->getDestinationAddress();
+  Packet* packet = _flit->packet();
 
   if (packet->getRoutingExtension() == nullptr) {
     RoutingInfo* ri = new RoutingInfo();
@@ -112,7 +112,7 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
   for (auto it = outputPorts.cbegin(); it != outputPorts.cend(); ++it) {
     u32 outputPort = *it;
     if (outputPort < concentration_) {
-      for (u32 vc = 0; vc < numVcs_; vc++) {
+      for (u32 vc = baseVc_; vc < baseVc_ + numVcs_; vc++) {
         _response->add(outputPort, vc);
       }
       assert(_response->size() > 0);
@@ -128,7 +128,8 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
       if (ri->valiantMode == false && ri->globalHopCount == 0) {
         f64 availability = 0.0;
         u32 vcCount = 0;
-        for (u32 vc = vcSet; vc < numVcs_; vc += 2 * localDimWidths_.size()
+        for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
+             vc += 2 * localDimWidths_.size()
                  + 2 * globalDimWidths_.size()) {
           // u32 vcIdx = router_->vcIndex(outputPort, vc);
           availability += router_->congestionStatus(outputPort, vc);
@@ -156,7 +157,8 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
     u32 outputPort = *it;
     if (outputPort >= concentration_) {
       if (switchedToValiant == false) {
-        for (u32 vc = vcSet; vc < numVcs_; vc += 2 * localDimWidths_.size()
+        for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
+             vc += 2 * localDimWidths_.size()
                  + 2 * globalDimWidths_.size()) {
           _response->add(outputPort, vc);
         }
@@ -190,7 +192,8 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
     for (auto it = outputPorts.cbegin(); it != outputPorts.cend(); ++it) {
       u32 outputPort = *it;
       if (outputPort >= concentration_) {
-        for (u32 vc = vcSet; vc < numVcs_; vc += 2 * localDimWidths_.size()
+        for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
+             vc += 2 * localDimWidths_.size()
                  + 2 * globalDimWidths_.size()) {
           _response->add(outputPort, vc);
         }
@@ -203,8 +206,8 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
 std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
     Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
-  const std::vector<u32>& routerAddress = router_->getAddress();
-  Packet* packet = _flit->getPacket();
+  const std::vector<u32>& routerAddress = router_->address();
+  Packet* packet = _flit->packet();
   u32 globalDimensions = globalDimWidths_.size();
   u32 localDimensions = localDimWidths_.size();
   u32 numRoutersPerGlobalRouter = 1;
