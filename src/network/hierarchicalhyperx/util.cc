@@ -71,11 +71,8 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       _packet->getRoutingExtension());
   // pick a random global dimension
-  printf("diffDimSize = %u\n", _diffGlobalDims.size());
   u32 pos = gSim->rnd.nextU64(0, _diffGlobalDims.size() - 1);
-  printf("pos = %u\n", pos);
   u32 globalDim = _diffGlobalDims.at(pos);
-  printf("globalDim = %u\n", globalDim);
   u32 globalPortBase = 0;
   for (u32 dim = 0; dim < globalDim; dim++) {
     globalPortBase += ((_globalDimWidths.at(dim) - 1)

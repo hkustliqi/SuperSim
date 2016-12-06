@@ -25,8 +25,10 @@
 #include <iostream>
 
 #include "event/Component.h"
+#include "event/Simulator.h"
 #include "network/cube/util.h"
 #include "router/Router.h"
+#include "rnd/Random.h"
 #include "test/TestSetup_TEST.h"
 #include "types/Packet.h"
 
@@ -142,15 +144,9 @@ TEST(HierarchicalHyperXUtil, getPortBase) {
 }
 
 
-TEST(HierarchicalHyperXUtil, test) {
-  TestSetup(1, 1, 123);
-  std::vector<u32> test = {0, 1};
-  printf("bef0re\n");
-  u32 num = test.at(gSim->rnd.nextU64(0, test.size() - 1));
-  printf("pos = %u\n", num);
-}
-/*
+
 TEST(HierarchicalHyperXUtil, setLocalDst) {
+  TestSetup ts(1, 1, 123);
   std::vector<u32> diffGlobalDims;
   std::vector<u32> dstAdd;
   std::vector<u32> globalOutputPorts;
@@ -231,7 +227,6 @@ TEST(HierarchicalHyperXUtil, setLocalDst) {
   ASSERT_EQ(*(result->localDst), localDst);
   ASSERT_EQ(*(result->localDstPort), localDstPort);
 
-  printf("\n\n start \n");
   globalOutputPorts.clear();
   delete reinterpret_cast<const std::vector<u32>*>(result->localDst);
   result->localDst = nullptr;
@@ -245,9 +240,6 @@ TEST(HierarchicalHyperXUtil, setLocalDst) {
   globalDimWeight = {1, 1};
   localDst = {2, 1};
   localDstPort = {0};
-  printf("diffDimSize = %lu \n", diffGlobalDims.size());
-  u32 pos = gSim->rnd.nextU64(0, diffGlobalDims.size() - 1);
-  printf("pos = %u\n", pos);
   HierarchicalHyperX::setLocalDst(diffGlobalDims, dstAdd, &globalOutputPorts,
                                   packet, routerAdd, localDimWidth,
                                   globalDimWidth, globalDimWeight);
@@ -255,4 +247,4 @@ TEST(HierarchicalHyperXUtil, setLocalDst) {
       packet->getRoutingExtension());
   ASSERT_EQ(*(result->localDst), localDst);
   ASSERT_EQ(*(result->localDstPort), localDstPort);
-  }*/
+}
