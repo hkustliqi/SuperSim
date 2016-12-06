@@ -150,7 +150,7 @@ std::unordered_set<u32> GlobalAndLocalRandomRoutingAlgorithm::routing
     if (ri->localDst == nullptr) {
       // pick a random global dimension
       setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
-                  _flit, routerAddress, localDimWidths_, globalDimWidths_,
+                  packet, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
 

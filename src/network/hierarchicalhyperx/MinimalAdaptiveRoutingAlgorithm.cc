@@ -160,7 +160,7 @@ std::unordered_set<u32> MinimalAdaptiveRoutingAlgorithm::routing
   if (atGlobalDst == false) {
     if (ri->localDst == nullptr) {
       setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
-                  _flit, routerAddress, localDimWidths_, globalDimWidths_,
+                  packet, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
 
@@ -336,7 +336,7 @@ void MinimalAdaptiveRoutingAlgorithm::ifAtLocalDst
       }
       ri->localDstPort = nullptr;
       setLocalDst(_diffGlobalDims, *destinationAddress, _globalOutputPorts,
-                  _flit, routerAddress, localDimWidths_, globalDimWidths_,
+                  packet, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
       ri->localDerouteCount--;
       packet->setRoutingExtension(ri);

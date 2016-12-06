@@ -180,7 +180,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveGRoutingAlgorithm::routing(
       std::vector<u32> diffGlobalDims;
       diffGlobalDims.push_back(globalDim);
       setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
-                  _flit, routerAddress, localDimWidths_, globalDimWidths_,
+                  packet, routerAddress, localDimWidths_, globalDimWidths_,
                   globalDimWeights_);
     }
     const std::vector<u32>* localDst =

@@ -61,19 +61,21 @@ u32 getPortBase(u32 _concentration, const std::vector<u32>& _localDimWidths,
 // and final dst are in different groups
 void setLocalDst(const std::vector<u32>& _diffGlobalDims,
                  const std::vector<u32>& _destinationAddress,
-                 std::vector<u32>* _globalOutputPorts, Flit* _flit,
+                 std::vector<u32>* _globalOutputPorts,
+                 Packet* _packet,
                  const std::vector<u32>& _routerAddress,
                  const std::vector<u32>& _localDimWidths,
                  const std::vector<u32>& _globalDimWidths,
                  const std::vector<u32>& _globalDimWeights) {
   u32 localDimensions = _localDimWidths.size();
-  Packet* packet = _flit->packet();
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
-      packet->getRoutingExtension());
-
+      _packet->getRoutingExtension());
   // pick a random global dimension
-  u32 globalDim = _diffGlobalDims.at
-    (gSim->rnd.nextU64(0, _diffGlobalDims.size() - 1));
+  printf("diffDimSize = %u\n", _diffGlobalDims.size());
+  u32 pos = gSim->rnd.nextU64(0, _diffGlobalDims.size() - 1);
+  printf("pos = %u\n", pos);
+  u32 globalDim = _diffGlobalDims.at(pos);
+  printf("globalDim = %u\n", globalDim);
   u32 globalPortBase = 0;
   for (u32 dim = 0; dim < globalDim; dim++) {
     globalPortBase += ((_globalDimWidths.at(dim) - 1)
@@ -94,7 +96,6 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
     _globalOutputPorts->push_back(globalPort);
   }
   assert(_globalOutputPorts->size() > 0);
-
   bool hasGlobalLinkToDst = false;
   std::vector<u32>* dstPort = new std::vector<u32>;
 
@@ -111,11 +112,12 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
       ri->localDst = localRouter;
       dstPort->push_back(connectedPort);
       ri->localDstPort = dstPort;
-      packet->setRoutingExtension(ri);
+      _packet->setRoutingExtension(ri);
     } else {
       delete localRouter;
     }
   }
+
   // if no global link, pick a random one
   if (hasGlobalLinkToDst == false) {
     // pick a random global port
@@ -127,11 +129,10 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
     u32 connectedPort;
     globalPortToLocalAddress(globalPort, localRouter, &connectedPort,
                              _localDimWidths);
-
     dstPort->push_back(connectedPort);
     ri->localDst = localRouter;
     ri->localDstPort = dstPort;
-    packet->setRoutingExtension(ri);
+    _packet->setRoutingExtension(ri);
   }
 }
 

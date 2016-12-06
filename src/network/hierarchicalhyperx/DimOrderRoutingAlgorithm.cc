@@ -156,7 +156,7 @@ std::unordered_set<u32> DimOrderRoutingAlgorithm::routing
         std::vector<u32> diffGlobalDims;
         diffGlobalDims.push_back(globalDim);
         setLocalDst(diffGlobalDims, _destinationAddress, &globalOutputPorts,
-                    _flit, routerAddress, localDimWidths_, globalDimWidths_,
+                    packet, routerAddress, localDimWidths_, globalDimWidths_,
                     globalDimWeights_);
       }
 
