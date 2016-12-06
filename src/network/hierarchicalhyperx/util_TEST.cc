@@ -142,6 +142,14 @@ TEST(HierarchicalHyperXUtil, getPortBase) {
 }
 
 
+TEST(HierarchicalHyperXUtil, test) {
+  TestSetup(1, 1, 123);
+  std::vector<u32> test = {0, 1};
+  printf("bef0re\n");
+  u32 num = test.at(gSim->rnd.nextU64(0, test.size() - 1));
+  printf("pos = %u\n", num);
+}
+/*
 TEST(HierarchicalHyperXUtil, setLocalDst) {
   std::vector<u32> diffGlobalDims;
   std::vector<u32> dstAdd;
@@ -247,4 +255,4 @@ TEST(HierarchicalHyperXUtil, setLocalDst) {
       packet->getRoutingExtension());
   ASSERT_EQ(*(result->localDst), localDst);
   ASSERT_EQ(*(result->localDstPort), localDstPort);
-}
+  }*/
