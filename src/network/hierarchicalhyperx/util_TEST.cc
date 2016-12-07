@@ -154,9 +154,10 @@ TEST(HierarchicalHyperXUtil, setLocalDst) {
   std::vector<u32> localDimWidth;
   std::vector<u32> globalDimWidth;
   std::vector<u32> globalDimWeight;
-  void* data = new int(2);
-  Message* message = new Message(1, data);
-  Packet* packet = new Packet(1, 1, message);
+
+  Message* m = new Message(1, nullptr);
+  Packet* packet = new Packet(1, 1, m);
+  m->setPacket(0, packet);
   std::vector<u32> localDst;
   std::vector<u32> localDstPort;
   RoutingInfo* ri = new RoutingInfo();

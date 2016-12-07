@@ -23,9 +23,9 @@
         }
       },
       {
-        "num_vcs": 3,
+        "num_vcs": 6,
         "routing": {
-          "algorithm": "dimension_order",
+          "algorithm": "valiant",
           "latency": 1
         }
       }

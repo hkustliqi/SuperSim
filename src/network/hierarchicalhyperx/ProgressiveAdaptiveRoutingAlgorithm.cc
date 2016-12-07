@@ -41,7 +41,7 @@ ProgressiveAdaptiveRoutingAlgorithm::ProgressiveAdaptiveRoutingAlgorithm(
        _globalDimensionWidths,
        _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
        _concentration, _globalLinksPerRouter, true) {
-  assert(numVcs_ >= 2 * localDimWidths_.size() + 2 * globalDimWidths_.size());
+  assert(numVcs_ >= 2 * globalDimWidths_.size() + 3);
 }
 
 ProgressiveAdaptiveRoutingAlgorithm::~ProgressiveAdaptiveRoutingAlgorithm() {}
@@ -99,9 +99,13 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
   // figure out which VC set to use
   u32 vcSet;
   if (ri->globalHopCount == 0) {
-    vcSet = packet->getHopCount() - 1;
+    if (ri->valiantMode == false) {
+      vcSet = 0;
+    } else {
+      vcSet = 1;
+    }
   } else {
-    vcSet = 2*localDimWidths_.size() - 1 + ri->globalHopCount;
+    vcSet = 1 + ri->globalHopCount;
   }
 
   // format the response
@@ -120,8 +124,7 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       packet->setRoutingExtension(nullptr);
     } else {
       for (u32 vc = baseVc_ + vcSet; vc < baseVc_ + numVcs_;
-           vc += 2 * localDimWidths_.size()
-               + 2 * globalDimWidths_.size()) {
+           vc += 2 * globalDimWidths_.size() + 3) {
         _response->add(outputPort, vc);
       }
     }
@@ -179,8 +182,8 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::advance(MINIt, MINRandom);
     int MINOutputPort = *(MINIt);
     f64 MINAvailability = 0.0;
-    for (u32 vc = packet->getHopCount() - 1; vc < numVcs_;
-         vc += 2 * localDimensions + 2 * globalDimensions) {
+    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
+         vc += 2 * globalDimensions + 3) {
       MINAvailability += router_->congestionStatus(MINOutputPort, vc);
     }
     int VALOutputSize = VALOutputPorts.size();
@@ -190,8 +193,8 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::advance(VALIt, VALRandom);
     int VALOutputPort = *(VALIt);
     f64 VALAvailability = 0.0;
-    for (u32 vc = packet->getHopCount() - 1; vc < numVcs_;
-         vc += 2 * localDimensions + 2 * globalDimensions) {
+    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
+         vc += 2 * globalDimensions + 3) {
       VALAvailability += router_->congestionStatus(VALOutputPort, vc);
     }
     // UGAL
