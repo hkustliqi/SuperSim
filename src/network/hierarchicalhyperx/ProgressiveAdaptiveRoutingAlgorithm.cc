@@ -172,8 +172,6 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     // UGAL
     std::unordered_set<u32> MINOutputPorts = DimOrderRoutingAlgorithm::routing(
         _flit, _destinationAddress);
-    std::unordered_set<u32> VALOutputPorts = ValiantRoutingAlgorithm::routing(
-        _flit, _destinationAddress);
     // choose random port to evaluate queue size
     int MINOutputSize = MINOutputPorts.size();
     assert(MINOutputSize > 0);
@@ -186,24 +184,32 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
          vc += 2 * globalDimensions + 3) {
       MINAvailability += router_->congestionStatus(MINOutputPort, vc);
     }
-    int VALOutputSize = VALOutputPorts.size();
-    assert(VALOutputSize > 0);
-    int VALRandom = gSim->rnd.nextU64(0, VALOutputSize - 1);
-    auto VALIt = VALOutputPorts.begin();
-    std::advance(VALIt, VALRandom);
-    int VALOutputPort = *(VALIt);
-    f64 VALAvailability = 0.0;
+
+    std::unordered_set<u32> NonMINOutputPorts;
+    for (u32 localPort = concentration_; localPort <
+           getPortBase(concentration_, localDimWidths_, localDimWeights_);
+         localPort++) {
+      NonMINOutputPorts.insert(localPort);
+    }
+    int NonMINOutputSize = NonMINOutputPorts.size();
+    assert(NonMINOutputSize > 0);
+    int NonMINRandom = gSim->rnd.nextU64(0, NonMINOutputSize - 1);
+    auto NonMINIt = NonMINOutputPorts.begin();
+    std::advance(NonMINIt, NonMINRandom);
+    int NonMINOutputPort = *(NonMINIt);
+    f64 NonMINAvailability = 0.0;
     for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
          vc += 2 * globalDimensions + 3) {
-      VALAvailability += router_->congestionStatus(VALOutputPort, vc);
+      NonMINAvailability += router_->congestionStatus(NonMINOutputPort, vc);
     }
     // UGAL
-    if (MINAvailability <= 2 * VALAvailability) {
+    if (MINAvailability <= 2 * NonMINAvailability) {
       outputPorts = MINOutputPorts;
     } else {
       // switch to valiant
-      outputPorts = VALOutputPorts;
+      outputPorts = NonMINOutputPorts;
       ri->valiantMode = true;
+      printf("switched to valiant");
     }
 
   } else {
