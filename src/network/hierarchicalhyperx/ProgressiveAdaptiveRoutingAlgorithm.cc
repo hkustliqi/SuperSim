@@ -52,6 +52,7 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
   const std::vector<u32>* destinationAddress =
       _flit->packet()->message()->getDestinationAddress();
   Packet* packet = _flit->packet();
+  const std::vector<u32>& routerAddress = router_->address();
 
   if (packet->getRoutingExtension() == nullptr) {
     RoutingInfo* ri = new RoutingInfo();
@@ -75,6 +76,78 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
     assert(outputPorts.size() >= 1);
   } else {
     // use Valiant routing
+    if (ri->intermediateAddress == nullptr) {
+      std::vector<u32>* re = new std::vector<u32>(1 + routerAddress.size());
+      re->at(0) = U32_MAX;  // dummy
+
+      // random intermediate local address
+      for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
+        re->at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
+      }
+      u32 globalPort = 0;
+      u32 globalPortBase = 1;
+      for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
+        globalPort += routerAddress.at(idx) * globalPortBase;
+        globalPortBase *= localDimWidths_.at(idx);
+      }
+      std::vector<u32> globalPorts;
+      for (u32 i = 0; i < globalLinksPerRouter_; i++) {
+        globalPorts.push_back(globalPort + i * globalPortBase);
+      }
+      u32 rnd = gSim->rnd.nextU64(0, globalPorts.size()-1);
+      u32 randomGlobalPort = globalPorts.at(rnd);
+      std::vector<u32>* newLocalDstPort = new std::vector<u32>;
+      newLocalDstPort->push_back(rnd);
+
+      // global source router
+      std::vector<u32> srcGlobalAddress(
+        routerAddress.begin() + localDimWidths_.size(), routerAddress.end());
+      // determine global destination router
+      u32 virtualGlobalPortBase = 0;
+      bool globalDstSet = false;
+
+      for (u32 globalDim = 0; globalDim < globalDimWidths_.size();
+           globalDim++) {
+        u32 globalDimWidth = globalDimWidths_.at(globalDim);
+        u32 globalDimWeight = globalDimWeights_.at(globalDim);
+        std::vector<u32> dstGlobalAddress(srcGlobalAddress);
+        for (u32 offset = 1; offset < globalDimWidth; offset++) {
+          dstGlobalAddress.at(globalDim) = (srcGlobalAddress.at(globalDim)
+                                          + offset) % globalDimWidth;
+          for (u32 weight = 0; weight < globalDimWeight; weight++) {
+            // determine the vitual port of global router
+            u32 virtualGlobalSrcPort = virtualGlobalPortBase
+                + ((offset - 1) * globalDimWeight)
+                + weight;
+            if (virtualGlobalSrcPort == randomGlobalPort) {
+              // intermediate global address should be linked to
+              // current global link
+              for (u32 idx = 0; idx < globalDimWidths_.size(); idx++) {
+                re->at(idx + localDimWidths_.size() + 1) =
+                  dstGlobalAddress.at(idx);
+              }
+              globalDstSet = true;
+            }
+          }
+        }
+        virtualGlobalPortBase += ((globalDimWidth - 1) * globalDimWeight);
+      }
+      assert(globalDstSet == true);
+      ri->intermediateAddress = re;
+
+      // reset LocalDst to current routerAddress
+      assert(ri->localDst != nullptr);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      std::vector<u32>* newLocalDst = new std::vector<u32> (
+                                        localDimWidths_.size());
+      for (u32 i = 0; i < localDimWidths_.size(); i++) {
+        newLocalDst->at(i) = routerAddress.at(i);
+      }
+      ri->localDst = newLocalDst;
+      ri->localDstPort = newLocalDstPort;
+    }
+
     outputPorts = ValiantRoutingAlgorithm::routing(
         _flit, *destinationAddress);
     assert(outputPorts.size() >= 1);
@@ -186,9 +259,9 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     }
 
     std::unordered_set<u32> NonMINOutputPorts;
-    for (u32 localPort = concentration_; localPort <
-           getPortBase(concentration_, localDimWidths_, localDimWeights_);
-         localPort++) {
+    u32 maxPort = getPortBase(concentration_, localDimWidths_,
+                              localDimWeights_);
+    for (u32 localPort = concentration_; localPort < maxPort; localPort++) {
       NonMINOutputPorts.insert(localPort);
     }
     int NonMINOutputSize = NonMINOutputPorts.size();
@@ -202,6 +275,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
          vc += 2 * globalDimensions + 3) {
       NonMINAvailability += router_->congestionStatus(NonMINOutputPort, vc);
     }
+
     // UGAL
     if (MINAvailability <= 2 * NonMINAvailability) {
       outputPorts = MINOutputPorts;
@@ -209,7 +283,10 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
       // switch to valiant
       outputPorts = NonMINOutputPorts;
       ri->valiantMode = true;
-      printf("switched to valiant");
+      // printf("Router address is %s \n",
+      //   strop::vecString<u32>(routerAddress).c_str());
+      // printf("switched to valiant, MINAvai = %f, NonMINAV = %f \n",
+      //       MINAvailability, NonMINAvailability);
     }
 
   } else {
