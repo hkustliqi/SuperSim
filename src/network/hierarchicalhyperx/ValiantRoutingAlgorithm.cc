@@ -72,7 +72,8 @@ void ValiantRoutingAlgorithm::processRequest(
     delete ri;
     packet->setRoutingExtension(nullptr);
   } else {
-    std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress);
+    std::unordered_set<u32> outputPorts = routing(_flit, *destinationAddress,
+                                                  randomGroup_);
     assert(outputPorts.size() > 0);
     RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
         packet->getRoutingExtension());
@@ -109,7 +110,8 @@ void ValiantRoutingAlgorithm::processRequest(
 }
 
 std::unordered_set<u32> ValiantRoutingAlgorithm::routing
-  (Flit* _flit, const std::vector<u32>& _destinationAddress) const {
+  (Flit* _flit, const std::vector<u32>& _destinationAddress,
+    bool _randomGroup) const {
   const std::vector<u32>& routerAddress = router_->address();
   Packet* packet = _flit->packet();
 
@@ -164,7 +166,7 @@ std::unordered_set<u32> ValiantRoutingAlgorithm::routing
 
   // update intermediate info for Valiant
   if (ri->intermediateDone == false) {
-    if (randomGroup_ == true) {
+    if (_randomGroup == true) {
       const std::vector<u32> intermediateGroup
         (intermediateAddress->begin() + localDimWidths_.size() + 1,
          intermediateAddress->end());

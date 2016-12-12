@@ -45,6 +45,7 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
   bool randomGroup = settings_["random_group"].asBool();
   f64 congestionThreshold = settings_["congestion_threshold"].asFloat();
   u32 localDetour = settings_["num_local_deroute"].asUInt();
+  f64 bias = settings_["bias"].asFloat();
 
   if (algorithm == "dimension_order") {
     return new HierarchicalHyperX::DimOrderRoutingAlgorithm(
@@ -77,7 +78,8 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
     return new HierarchicalHyperX::ProgressiveAdaptiveRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
-        localDimensionWeights_, concentration_, globalLinksPerRouter_);
+        localDimensionWeights_, concentration_, globalLinksPerRouter_,
+        randomGroup, bias);
   } else if (algorithm == "threshold_progressive_adaptive") {
     return new HierarchicalHyperX::ThresholdProgressiveAdaptiveRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,

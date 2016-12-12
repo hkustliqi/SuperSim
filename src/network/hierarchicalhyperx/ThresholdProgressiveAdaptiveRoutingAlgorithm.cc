@@ -79,7 +79,7 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
   } else {
     // use Valiant routing
     outputPorts = ValiantRoutingAlgorithm::routing(
-        _flit, *destinationAddress);
+                    _flit, *destinationAddress, true);
     assert(outputPorts.size() >= 1);
   }
 
@@ -167,7 +167,7 @@ void ThresholdProgressiveAdaptiveRoutingAlgorithm::processRequest(
   }
   if (switchedToValiant == true) {
     outputPorts = ValiantRoutingAlgorithm::routing(
-        _flit, *destinationAddress);
+                    _flit, *destinationAddress, true);
     assert(outputPorts.size() >= 1);
     // reset localDst once in a new group
     if (*outputPorts.begin() >= getPortBase(concentration_, localDimWidths_,
@@ -286,7 +286,7 @@ std::unordered_set<u32> ThresholdProgressiveAdaptiveRoutingAlgorithm::routing(
         ri->localDstPort = nullptr;
         packet->setRoutingExtension(ri);
         outputPorts = ValiantRoutingAlgorithm::routing(
-            _flit, _destinationAddress);
+                        _flit, _destinationAddress, true);
       }
       assert(outputPorts.size() >= 1);
     } else {

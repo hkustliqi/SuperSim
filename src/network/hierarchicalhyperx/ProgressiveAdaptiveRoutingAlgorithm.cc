@@ -35,12 +35,14 @@ ProgressiveAdaptiveRoutingAlgorithm::ProgressiveAdaptiveRoutingAlgorithm(
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
-    u32 _concentration, u32 _globalLinksPerRouter)
+    u32 _concentration, u32 _globalLinksPerRouter,
+    bool _randomGroup, f64 _bias)
     : ValiantRoutingAlgorithm
       (_name, _parent,  _router, _latency, _baseVc, _numVcs,
        _globalDimensionWidths,
        _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
-       _concentration, _globalLinksPerRouter, true) {
+       _concentration, _globalLinksPerRouter, _randomGroup),
+      bias_(_bias) {
   assert(numVcs_ >= 2 * globalDimWidths_.size() + 3);
 }
 
@@ -98,6 +100,8 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       u32 randomGlobalPort = globalPorts.at(rnd);
       std::vector<u32>* newLocalDstPort = new std::vector<u32>;
       newLocalDstPort->push_back(rnd);
+      // printf("Router address is %s \n",
+      //   strop::vecString<u32>(routerAddress).c_str());
 
       // global source router
       std::vector<u32> srcGlobalAddress(
@@ -134,6 +138,8 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       }
       assert(globalDstSet == true);
       ri->intermediateAddress = re;
+      // printf("Intermediate address is %s \n",
+      //   strop::vecString<u32>(*re).c_str());
 
       // reset LocalDst to current routerAddress
       assert(ri->localDst != nullptr);
@@ -146,10 +152,14 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       }
       ri->localDst = newLocalDst;
       ri->localDstPort = newLocalDstPort;
+      // printf("localDst is %s \n",
+      //   strop::vecString<u32>(*newLocalDst).c_str());
+      // printf("localDstPort is %s \n\n",
+      //   strop::vecString<u32>(*newLocalDstPort).c_str());
     }
 
     outputPorts = ValiantRoutingAlgorithm::routing(
-        _flit, *destinationAddress);
+                    _flit, *destinationAddress, randomGroup_);
     assert(outputPorts.size() >= 1);
   }
 
@@ -277,7 +287,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     }
 
     // UGAL
-    if (MINAvailability <= 2 * NonMINAvailability) {
+    if (MINAvailability <= 2 * NonMINAvailability + bias_) {
       outputPorts = MINOutputPorts;
     } else {
       // switch to valiant
