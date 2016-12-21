@@ -133,4 +133,107 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
   }
 }
 
+u32 getHopDistance(const std::vector<u32>& _routerAddress,
+                   const std::vector<u32>& _dstAddress,
+                   const std::vector<u32>& _localDimWidths,
+                   const std::vector<u32>& _globalDimWidths,
+                   const std::vector<u32>& _globalDimWeights) {
+  if (_routerAddress == _dstAddress) {
+    return 0;
+  }
+  u32 localDims = _localDimWidths.size();
+  u32 globalDims = _globalDimWidths.size();
+  std::vector<u32> routerLocalAdd(_routerAddress.begin(),
+                                  _routerAddress.begin() + localDims);
+  std::vector<u32> routerGlobalAdd(_routerAddress.begin() + localDims,
+                                   _routerAddress.end());
+  std::vector<u32> dstLocalAdd(_dstAddress.begin(),
+                               _dstAddress.begin() + localDims);
+  std::vector<u32> dstGlobalAdd(_dstAddress.begin() + localDims,
+                                _dstAddress.end());
+  if (routerGlobalAdd == dstGlobalAdd) {
+    u32 diffDims = 0;
+    for (u32 i=0; i < localDims; i++) {
+      if (routerLocalAdd.at(i) != dstLocalAdd.at(i)) {
+        diffDims++;
+      }
+    }
+    return diffDims;
+  } else {
+    std::vector<u32> nextGroup(routerGlobalAdd);
+    printf("nextGroup is %s \n",
+         strop::vecString<u32>(nextGroup).c_str());
+    u32 diffGlobalDim = 0;
+    for (u32 i = 0; i < globalDims; i++) {
+      if (dstGlobalAdd.at(i) != routerGlobalAdd.at(i)) {
+        nextGroup.at(i) = dstGlobalAdd.at(i);
+        diffGlobalDim = i;
+        break;
+      }
+    }
+    printf("diffGlobalDim = %u \n", diffGlobalDim);
+    u32 srcGroupPort = 0;
+    for (u32 globalDim = 0; globalDim < diffGlobalDim; globalDim++) {
+      srcGroupPort += (_globalDimWidths.at(globalDim) - 1) *
+                      _globalDimWeights.at(globalDim);
+    }
+    for (u32 offset = 1; offset < abs(nextGroup.at(diffGlobalDim)
+         - routerGlobalAdd.at(diffGlobalDim)); offset++) {
+      srcGroupPort += _globalDimWeights.at(diffGlobalDim);
+    }
+    u32 rndWeight = gSim->rnd.nextU64(0,
+                      _globalDimWeights.at(diffGlobalDim) - 1);
+    for (u32 weight = 0; weight < rndWeight; weight++) {
+      srcGroupPort++;
+    }
+    printf("srcGroupPort = %u \n", srcGroupPort);
+    u32 srcGroupPortFinal = 0;
+    u32 dstGroupPortFinal = 0;
+    // find src and dst group port number
+    u32 virtualGlobalPortBase = 0;
+    for (u32 globalDim = 0; globalDim < globalDims; globalDim++) {
+      u32 globalDimWidth = _globalDimWidths.at(globalDim);
+      u32 globalDimWeight = _globalDimWeights.at(globalDim);
+      for (u32 offset = 1; offset < globalDimWidth; offset++) {
+        for (u32 weight = 0; weight < globalDimWeight; weight++) {
+          // determine the vitual port of global router
+          u32 virtualGlobalSrcPort = virtualGlobalPortBase
+                + ((offset - 1) * globalDimWeight)
+                + weight;
+          u32 virtualGlobalDstPort = virtualGlobalPortBase
+              + ((globalDimWidth - 1 - offset) *
+                 globalDimWeight) + weight;
+          if (virtualGlobalSrcPort == srcGroupPort) {
+            srcGroupPortFinal = virtualGlobalSrcPort;
+            dstGroupPortFinal = virtualGlobalDstPort;
+          }
+        }
+      }
+      virtualGlobalPortBase += ((globalDimWidth - 1) * globalDimWeight);
+    }
+    printf("dstGroupPort = %u \n", dstGroupPortFinal);
+    std::vector<u32> srcGroupDst(routerLocalAdd);
+    u32 srcPort;
+    globalPortToLocalAddress(srcGroupPortFinal, &srcGroupDst, &srcPort,
+                             _localDimWidths);
+    srcGroupDst.insert(srcGroupDst.end(), routerGlobalAdd.begin(),
+                       routerGlobalAdd.end());
+    printf("srcGroupDst now is %s \n",
+         strop::vecString<u32>(srcGroupDst).c_str());
+    std::vector<u32> dstGroupDst(dstLocalAdd);
+    u32 dstPort;
+    globalPortToLocalAddress(dstGroupPortFinal, &dstGroupDst, &dstPort,
+                             _localDimWidths);
+    dstGroupDst.insert(dstGroupDst.end(), nextGroup.begin(),
+                       nextGroup.end());
+    printf("dstGroupDst now is %s \n",
+         strop::vecString<u32>(dstGroupDst).c_str());
+    u32 srcGroupHop = getHopDistance(_routerAddress, srcGroupDst,
+                   _localDimWidths, _globalDimWidths, _globalDimWeights);
+    u32 dstGroupHop = getHopDistance(dstGroupDst, _dstAddress,
+                   _localDimWidths, _globalDimWidths, _globalDimWeights);
+
+    return srcGroupHop + 1 + dstGroupHop;
+  }
+}
 }  // namespace HierarchicalHyperX

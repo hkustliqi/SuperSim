@@ -143,8 +143,6 @@ TEST(HierarchicalHyperXUtil, getPortBase) {
                                             localDimWeight), portBase);
 }
 
-
-
 TEST(HierarchicalHyperXUtil, setLocalDst) {
   TestSetup ts(1, 1, 123);
   std::vector<u32> diffGlobalDims;
@@ -248,4 +246,50 @@ TEST(HierarchicalHyperXUtil, setLocalDst) {
       packet->getRoutingExtension());
   ASSERT_EQ(*(result->localDst), localDst);
   ASSERT_EQ(*(result->localDstPort), localDstPort);
+}
+
+TEST(HierarchicalHyperXUtil, getHopDistance) {
+  TestSetup ts(1, 1, 123);
+  std::vector<u32> routerAdd;
+  std::vector<u32> dstAdd;
+  std::vector<u32> localDimWidth;
+  std::vector<u32> globalDimWidth;
+  std::vector<u32> globalDimWeight;
+  u32 hops;
+
+  routerAdd = {0, 0, 0, 0};
+  dstAdd = {0, 0, 0, 0};
+  localDimWidth = {3, 2};
+  globalDimWidth = {6, 2};
+  globalDimWeight = {1, 1};
+  hops = 0;
+  ASSERT_EQ(HierarchicalHyperX::getHopDistance(routerAdd, dstAdd, localDimWidth,
+            globalDimWidth, globalDimWeight), hops);
+
+  routerAdd = {0, 0, 0, 0};
+  dstAdd = {2, 1, 0, 0};
+  localDimWidth = {3, 2};
+  globalDimWidth = {6, 2};
+  globalDimWeight = {1, 1};
+  hops = 2;
+  ASSERT_EQ(HierarchicalHyperX::getHopDistance(routerAdd, dstAdd, localDimWidth,
+            globalDimWidth, globalDimWeight), hops);
+
+  routerAdd = {0, 0, 0, 0};
+  dstAdd = {0, 0, 0, 1};
+  localDimWidth = {3, 2};
+  globalDimWidth = {6, 2};
+  globalDimWeight = {1, 1};
+  hops = 5;
+  ASSERT_EQ(HierarchicalHyperX::getHopDistance(routerAdd, dstAdd, localDimWidth,
+            globalDimWidth, globalDimWeight), hops);
+
+  routerAdd = {0, 0, 0, 0};
+  dstAdd = {0, 0, 1, 1};
+  localDimWidth = {3, 2};
+  globalDimWidth = {6, 2};
+  globalDimWeight = {1, 1};
+  hops = 5;
+  ASSERT_EQ(HierarchicalHyperX::getHopDistance(routerAdd, dstAdd, localDimWidth,
+            globalDimWidth, globalDimWeight), hops);
 }

@@ -52,6 +52,13 @@ void setLocalDst(const std::vector<u32>& _diffGlobalDims,
                  const std::vector<u32>& _localDimWidths,
                  const std::vector<u32>& _globalDimWidths,
                  const std::vector<u32>& _globalDimWeights);
+
+u32 getHopDistance(const std::vector<u32>& _routerAddress,
+                   const std::vector<u32>& _dstAddress,
+                   const std::vector<u32>& _localDimWidths,
+                   const std::vector<u32>& _globalDimWidths,
+                   const std::vector<u32>& _globalDimWeights);
+
 }  // namespace HierarchicalHyperX
 
 #endif  // NETWORK_HIERARCHICALHYPERX_UTIL_H_
