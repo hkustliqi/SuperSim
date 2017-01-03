@@ -161,8 +161,6 @@ u32 getHopDistance(const std::vector<u32>& _routerAddress,
     return diffDims;
   } else {
     std::vector<u32> nextGroup(routerGlobalAdd);
-    printf("nextGroup is %s \n",
-         strop::vecString<u32>(nextGroup).c_str());
     u32 diffGlobalDim = 0;
     for (u32 i = 0; i < globalDims; i++) {
       if (dstGlobalAdd.at(i) != routerGlobalAdd.at(i)) {
@@ -171,7 +169,6 @@ u32 getHopDistance(const std::vector<u32>& _routerAddress,
         break;
       }
     }
-    printf("diffGlobalDim = %u \n", diffGlobalDim);
     u32 srcGroupPort = 0;
     for (u32 globalDim = 0; globalDim < diffGlobalDim; globalDim++) {
       srcGroupPort += (_globalDimWidths.at(globalDim) - 1) *
@@ -186,7 +183,6 @@ u32 getHopDistance(const std::vector<u32>& _routerAddress,
     for (u32 weight = 0; weight < rndWeight; weight++) {
       srcGroupPort++;
     }
-    printf("srcGroupPort = %u \n", srcGroupPort);
     u32 srcGroupPortFinal = 0;
     u32 dstGroupPortFinal = 0;
     // find src and dst group port number
@@ -211,23 +207,19 @@ u32 getHopDistance(const std::vector<u32>& _routerAddress,
       }
       virtualGlobalPortBase += ((globalDimWidth - 1) * globalDimWeight);
     }
-    printf("dstGroupPort = %u \n", dstGroupPortFinal);
     std::vector<u32> srcGroupDst(routerLocalAdd);
     u32 srcPort;
     globalPortToLocalAddress(srcGroupPortFinal, &srcGroupDst, &srcPort,
                              _localDimWidths);
     srcGroupDst.insert(srcGroupDst.end(), routerGlobalAdd.begin(),
                        routerGlobalAdd.end());
-    printf("srcGroupDst now is %s \n",
-         strop::vecString<u32>(srcGroupDst).c_str());
     std::vector<u32> dstGroupDst(dstLocalAdd);
     u32 dstPort;
     globalPortToLocalAddress(dstGroupPortFinal, &dstGroupDst, &dstPort,
                              _localDimWidths);
     dstGroupDst.insert(dstGroupDst.end(), nextGroup.begin(),
                        nextGroup.end());
-    printf("dstGroupDst now is %s \n",
-         strop::vecString<u32>(dstGroupDst).c_str());
+
     u32 srcGroupHop = getHopDistance(_routerAddress, srcGroupDst,
                    _localDimWidths, _globalDimWidths, _globalDimWeights);
     u32 dstGroupHop = getHopDistance(dstGroupDst, _dstAddress,

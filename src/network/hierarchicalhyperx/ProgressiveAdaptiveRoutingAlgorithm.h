@@ -49,6 +49,7 @@ class ProgressiveAdaptiveRoutingAlgorithm : public ValiantRoutingAlgorithm {
  private:
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress) const;
+  u32 setIntermediateAdd(std::vector<u32>* re) const;
   const f64 bias_;
 };
 

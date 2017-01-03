@@ -80,64 +80,10 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
     // use Valiant routing
     if (ri->intermediateAddress == nullptr) {
       std::vector<u32>* re = new std::vector<u32>(1 + routerAddress.size());
-      re->at(0) = U32_MAX;  // dummy
-
-      // random intermediate local address
-      for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
-        re->at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
-      }
-      u32 globalPort = 0;
-      u32 globalPortBase = 1;
-      for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
-        globalPort += routerAddress.at(idx) * globalPortBase;
-        globalPortBase *= localDimWidths_.at(idx);
-      }
-      std::vector<u32> globalPorts;
-      for (u32 i = 0; i < globalLinksPerRouter_; i++) {
-        globalPorts.push_back(globalPort + i * globalPortBase);
-      }
-      u32 rnd = gSim->rnd.nextU64(0, globalPorts.size()-1);
-      u32 randomGlobalPort = globalPorts.at(rnd);
+      u32 rnd = setIntermediateAdd(re);
+      ri->intermediateAddress = re;
       std::vector<u32>* newLocalDstPort = new std::vector<u32>;
       newLocalDstPort->push_back(rnd);
-      // printf("Router address is %s \n",
-      //   strop::vecString<u32>(routerAddress).c_str());
-
-      // global source router
-      std::vector<u32> srcGlobalAddress(
-        routerAddress.begin() + localDimWidths_.size(), routerAddress.end());
-      // determine global destination router
-      u32 virtualGlobalPortBase = 0;
-      bool globalDstSet = false;
-
-      for (u32 globalDim = 0; globalDim < globalDimWidths_.size();
-           globalDim++) {
-        u32 globalDimWidth = globalDimWidths_.at(globalDim);
-        u32 globalDimWeight = globalDimWeights_.at(globalDim);
-        std::vector<u32> dstGlobalAddress(srcGlobalAddress);
-        for (u32 offset = 1; offset < globalDimWidth; offset++) {
-          dstGlobalAddress.at(globalDim) = (srcGlobalAddress.at(globalDim)
-                                          + offset) % globalDimWidth;
-          for (u32 weight = 0; weight < globalDimWeight; weight++) {
-            // determine the vitual port of global router
-            u32 virtualGlobalSrcPort = virtualGlobalPortBase
-                + ((offset - 1) * globalDimWeight)
-                + weight;
-            if (virtualGlobalSrcPort == randomGlobalPort) {
-              // intermediate global address should be linked to
-              // current global link
-              for (u32 idx = 0; idx < globalDimWidths_.size(); idx++) {
-                re->at(idx + localDimWidths_.size() + 1) =
-                  dstGlobalAddress.at(idx);
-              }
-              globalDstSet = true;
-            }
-          }
-        }
-        virtualGlobalPortBase += ((globalDimWidth - 1) * globalDimWeight);
-      }
-      assert(globalDstSet == true);
-      ri->intermediateAddress = re;
       // printf("Intermediate address is %s \n",
       //   strop::vecString<u32>(*re).c_str());
 
@@ -152,10 +98,6 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       }
       ri->localDst = newLocalDst;
       ri->localDstPort = newLocalDstPort;
-      // printf("localDst is %s \n",
-      //   strop::vecString<u32>(*newLocalDst).c_str());
-      // printf("localDstPort is %s \n\n",
-      //   strop::vecString<u32>(*newLocalDstPort).c_str());
     }
 
     outputPorts = ValiantRoutingAlgorithm::routing(
@@ -290,8 +232,21 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
       NonMINAvailability += router_->congestionStatus(NonMINOutputPort, vc);
     }
 
+    std::vector<u32> dstRouterAdd(_destinationAddress);
+    dstRouterAdd.erase(dstRouterAdd.begin());
+    std::vector<u32> intermediateAdd(_destinationAddress);
+    u32 MINPathLen = getHopDistance(routerAddress, dstRouterAdd,
+      localDimWidths_, globalDimWidths_, globalDimWeights_);
+    setIntermediateAdd(&intermediateAdd);
+    intermediateAdd.erase(intermediateAdd.begin());
+    u32 NonMINPathLen = 0;
+    NonMINPathLen += getHopDistance(routerAddress, intermediateAdd,
+      localDimWidths_, globalDimWidths_, globalDimWeights_);
+    NonMINPathLen += getHopDistance(intermediateAdd, dstRouterAdd,
+    localDimWidths_, globalDimWidths_, globalDimWeights_);
     // UGAL
-    if (MINAvailability <= 2 * NonMINAvailability + bias_) {
+    if (MINAvailability * MINPathLen <=
+        NonMINAvailability * NonMINPathLen + bias_) {
       outputPorts = MINOutputPorts;
     } else {
       // switch to valiant
@@ -312,4 +267,62 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
   return outputPorts;
 }
 
+u32 ProgressiveAdaptiveRoutingAlgorithm::setIntermediateAdd(
+    std::vector<u32>* re) const {
+  const std::vector<u32>& routerAddress = router_->address();
+
+  re->at(0) = U32_MAX;  // dummy
+  // random intermediate local address
+  for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
+    re->at(idx + 1) = gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
+  }
+  u32 globalPort = 0;
+  u32 globalPortBase = 1;
+  for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
+    globalPort += routerAddress.at(idx) * globalPortBase;
+    globalPortBase *= localDimWidths_.at(idx);
+  }
+  std::vector<u32> globalPorts;
+  for (u32 i = 0; i < globalLinksPerRouter_; i++) {
+    globalPorts.push_back(globalPort + i * globalPortBase);
+  }
+  u32 rnd = gSim->rnd.nextU64(0, globalPorts.size()-1);
+  u32 randomGlobalPort = globalPorts.at(rnd);
+
+  // global source router
+  std::vector<u32> srcGlobalAddress(routerAddress.begin()
+    + localDimWidths_.size(), routerAddress.end());
+  // determine RE global address from random port
+  u32 virtualGlobalPortBase = 0;
+  bool globalDstSet = false;
+
+  for (u32 globalDim = 0; globalDim < globalDimWidths_.size();
+       globalDim++) {
+    u32 globalDimWidth = globalDimWidths_.at(globalDim);
+    u32 globalDimWeight = globalDimWeights_.at(globalDim);
+    std::vector<u32> dstGlobalAddress(srcGlobalAddress);
+    for (u32 offset = 1; offset < globalDimWidth; offset++) {
+      dstGlobalAddress.at(globalDim) = (srcGlobalAddress.at(globalDim)
+                                        + offset) % globalDimWidth;
+      for (u32 weight = 0; weight < globalDimWeight; weight++) {
+        // determine the vitual port of global router
+        u32 virtualGlobalSrcPort = virtualGlobalPortBase
+          + ((offset - 1) * globalDimWeight)
+          + weight;
+        if (virtualGlobalSrcPort == randomGlobalPort) {
+          // intermediate global address should be linked to
+          // current global link
+          for (u32 idx = 0; idx < globalDimWidths_.size(); idx++) {
+            re->at(idx + localDimWidths_.size() + 1) =
+              dstGlobalAddress.at(idx);
+          }
+          globalDstSet = true;
+        }
+      }
+    }
+    virtualGlobalPortBase += ((globalDimWidth - 1) * globalDimWeight);
+  }
+  assert(globalDstSet == true);
+  return rnd;
+}
 }  // namespace HierarchicalHyperX
