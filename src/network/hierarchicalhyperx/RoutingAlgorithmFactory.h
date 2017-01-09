@@ -25,6 +25,7 @@
 #include "event/Component.h"
 #include "network/RoutingAlgorithmFactory.h"
 
+#include "network/hierarchicalhyperx/AverageProgressiveAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/DimOrderRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/GlobalAndLocalRandomRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/GlobalRandomRoutingAlgorithm.h"
