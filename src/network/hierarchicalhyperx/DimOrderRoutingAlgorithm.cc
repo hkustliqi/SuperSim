@@ -101,6 +101,8 @@ void DimOrderRoutingAlgorithm::processRequest
              vc += globalDimWidths_.size() + 1) {
           _response->add(outputPort, vc);
         }
+        // printf("Router address is %s \n",
+        // strop::vecString<u32>(router_->address()).c_str());
       }
     }
     assert(_response->size() > 0);

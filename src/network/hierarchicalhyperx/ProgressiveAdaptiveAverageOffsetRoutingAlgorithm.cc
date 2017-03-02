@@ -37,12 +37,13 @@ ProgressiveAdaptiveAverageOffsetRoutingAlgorithm::
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
-    bool _randomGroup)
+    bool _randomGroup, f64 _bias)
     : ValiantRoutingAlgorithm
       (_name, _parent,  _router, _latency, _baseVc, _numVcs,
        _globalDimensionWidths,
        _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
-       _concentration, _globalLinksPerRouter, _randomGroup) {
+       _concentration, _globalLinksPerRouter, _randomGroup),
+       bias_(_bias) {
   assert(numVcs_ >= 2 * globalDimWidths_.size() + 3);
 }
 
@@ -250,7 +251,7 @@ std::unordered_set<u32>
     localDimWidths_, globalDimWidths_, globalDimWeights_);
     // UGAL with average queue value and danymic offset
     if (MINAvailability * MINPathLen <=
-        AverageAvailability * (NonMINPathLen + 0.01)) {
+        AverageAvailability * (NonMINPathLen + bias_)) {
       outputPorts = MINOutputPorts;
     } else {
       // switch to valiant

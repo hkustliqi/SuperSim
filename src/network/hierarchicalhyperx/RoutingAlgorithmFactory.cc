@@ -86,7 +86,7 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
         localDimensionWeights_, concentration_, globalLinksPerRouter_,
-        randomGroup);
+        randomGroup, bias);
   } else if (algorithm == "progressive_adaptive_avg") {
     return new HierarchicalHyperX::ProgressiveAdaptiveAverageRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,

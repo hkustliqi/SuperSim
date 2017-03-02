@@ -39,7 +39,7 @@ class ProgressiveAdaptiveAverageOffsetRoutingAlgorithm : public
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
-    bool _randomGroup);
+    bool _randomGroup, f64 _bias);
 
   ~ProgressiveAdaptiveAverageOffsetRoutingAlgorithm();
 
@@ -51,6 +51,7 @@ class ProgressiveAdaptiveAverageOffsetRoutingAlgorithm : public
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress) const;
   u32 setIntermediateAdd(std::vector<u32>* re) const;
+  const f64 bias_;
 };
 
 }  // namespace HierarchicalHyperX

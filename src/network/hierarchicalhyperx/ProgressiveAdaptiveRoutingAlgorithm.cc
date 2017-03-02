@@ -70,6 +70,11 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       packet->getRoutingExtension());
 
+  /*    std::vector<u32> hardAdd;
+      hardAdd.push_back(3);
+      hardAdd.push_back(4);
+      hardAdd.push_back(0); */
+
   std::unordered_set<u32> outputPorts;
   // routing depends on mode
   if (ri->valiantMode == false) {
@@ -84,8 +89,6 @@ void ProgressiveAdaptiveRoutingAlgorithm::processRequest(
       ri->intermediateAddress = re;
       std::vector<u32>* newLocalDstPort = new std::vector<u32>;
       newLocalDstPort->push_back(rnd);
-      // printf("Intermediate address is %s \n",
-      //   strop::vecString<u32>(*re).c_str());
 
       // reset LocalDst to current routerAddress
       assert(ri->localDst != nullptr);
@@ -197,6 +200,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     // UGAL
     std::unordered_set<u32> MINOutputPorts = DimOrderRoutingAlgorithm::routing(
         _flit, _destinationAddress);
+
     // choose random port to evaluate queue size
     int MINOutputSize = MINOutputPorts.size();
     assert(MINOutputSize > 0);
@@ -205,8 +209,17 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::advance(MINIt, MINRandom);
     int MINOutputPort = *(MINIt);
     f64 MINAvailability = 0.0;
-    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
-         vc += 2 * globalDimensions + 3) {
+    /* if (router_->address() == hardAdd) {
+      printf("baseVc = %u \n", baseVc_);
+      for (u32 vc=0; vc < numVcs_; vc++) {
+        printf("vc = %u, availabitity = %f\n", vc,
+             router_->congestionStatus(MINOutputPort, vc));
+      }
+    } */
+    // found that the vc being used is offsetted by 2
+    // added +2 as a temporary fix
+    for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
+        vc += 2 * globalDimensions + 3) {
       MINAvailability += router_->congestionStatus(MINOutputPort, vc);
     }
 
@@ -227,7 +240,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::advance(NonMINIt, NonMINRandom);
     int NonMINOutputPort = *(NonMINIt);
     f64 NonMINAvailability = 0.0;
-    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
+    for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
          vc += 2 * globalDimensions + 3) {
       NonMINAvailability += router_->congestionStatus(NonMINOutputPort, vc);
     }
@@ -235,27 +248,37 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::vector<u32> dstRouterAdd(_destinationAddress);
     dstRouterAdd.erase(dstRouterAdd.begin());
     std::vector<u32> intermediateAdd(_destinationAddress);
-    u32 MINPathLen = getHopDistance(routerAddress, dstRouterAdd,
-      localDimWidths_, globalDimWidths_, globalDimWeights_);
+    //  u32 MINPathLen = getHopDistance(routerAddress, dstRouterAdd,
+    //  localDimWidths_, globalDimWidths_, globalDimWeights_);
     setIntermediateAdd(&intermediateAdd);
     intermediateAdd.erase(intermediateAdd.begin());
-    u32 NonMINPathLen = 0;
+    /* u32 NonMINPathLen = 0;
     NonMINPathLen += getHopDistance(routerAddress, intermediateAdd,
       localDimWidths_, globalDimWidths_, globalDimWeights_);
     NonMINPathLen += getHopDistance(intermediateAdd, dstRouterAdd,
-    localDimWidths_, globalDimWidths_, globalDimWeights_);
+    localDimWidths_, globalDimWidths_, globalDimWeights_); */
+
+    /* if (router_->address() == hardAdd) {
+      printf("Router address is %s \n",
+         strop::vecString<u32>(routerAddress).c_str());
+      printf("Dst address is %s \n",
+         strop::vecString<u32>(dstRouterAdd).c_str());
+      printf("MIN port is %u \n", MINOutputPort);
+      printf("NonMIN port is %u \n", NonMINOutputPort);
+      printf("MINAvai = %f, NonMINAV = %f \n",
+         MINAvailability, NonMINAvailability);
+    } */
+
     // UGAL
-    if (MINAvailability * MINPathLen <=
-        NonMINAvailability * NonMINPathLen + bias_) {
+    if (  // false
+         MINAvailability  <= NonMINAvailability * 2 + bias_
+        // && MINAvailability < 0.03
+        ) {
       outputPorts = MINOutputPorts;
     } else {
       // switch to valiant
       outputPorts = NonMINOutputPorts;
       ri->valiantMode = true;
-      // printf("Router address is %s \n",
-      //   strop::vecString<u32>(routerAddress).c_str());
-      // printf("switched to valiant, MINAvai = %f, NonMINAV = %f \n",
-      //       MINAvailability, NonMINAvailability);
     }
 
   } else {
