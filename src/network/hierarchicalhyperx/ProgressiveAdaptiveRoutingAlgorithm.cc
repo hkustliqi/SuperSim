@@ -179,6 +179,10 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     globalPortBase += ((globalDimWidths_.at(globalDim) - 1)
                        * globalDimWeights_.at(globalDim));
   }
+  /*    std::vector<u32> hardAdd;
+      hardAdd.push_back(3);
+      hardAdd.push_back(0);
+      hardAdd.push_back(0);*/
 
   std::vector<u32> globalOutputPorts;
   std::unordered_set<u32> outputPorts;
@@ -215,11 +219,14 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
         printf("vc = %u, availabitity = %f\n", vc,
              router_->congestionStatus(MINOutputPort, vc));
       }
-    } */
+      } */
     // found that the vc being used is offsetted by 2
     // added +2 as a temporary fix
-    for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
-        vc += 2 * globalDimensions + 3) {
+    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
+        vc += 1) {
+      /*  if (router_->address() == hardAdd) {
+      printf("checking vc %u\n", vc);
+      }*/
       MINAvailability += router_->congestionStatus(MINOutputPort, vc);
     }
 
@@ -240,8 +247,8 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     std::advance(NonMINIt, NonMINRandom);
     int NonMINOutputPort = *(NonMINIt);
     f64 NonMINAvailability = 0.0;
-    for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
-         vc += 2 * globalDimensions + 3) {
+    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
+         vc += 1) {
       NonMINAvailability += router_->congestionStatus(NonMINOutputPort, vc);
     }
 
@@ -258,7 +265,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     NonMINPathLen += getHopDistance(intermediateAdd, dstRouterAdd,
     localDimWidths_, globalDimWidths_, globalDimWeights_); */
 
-    /* if (router_->address() == hardAdd) {
+    /*  if (router_->address() == hardAdd) {
       printf("Router address is %s \n",
          strop::vecString<u32>(routerAddress).c_str());
       printf("Dst address is %s \n",
@@ -267,7 +274,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
       printf("NonMIN port is %u \n", NonMINOutputPort);
       printf("MINAvai = %f, NonMINAV = %f \n",
          MINAvailability, NonMINAvailability);
-    } */
+     }*/
 
     // UGAL
     if (  // false
