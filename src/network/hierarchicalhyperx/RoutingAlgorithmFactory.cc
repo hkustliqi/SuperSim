@@ -93,6 +93,12 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
         localDimensionWeights_, concentration_, globalLinksPerRouter_,
         randomGroup);
+  } else if (algorithm == "progressive_adaptive_random") {
+    return new HierarchicalHyperX::ProgressiveAdaptiveRandomRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_,
+        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
+        localDimensionWeights_, concentration_, globalLinksPerRouter_,
+        randomGroup, bias);
   } else if (algorithm == "threshold_progressive_adaptive") {
     return new HierarchicalHyperX::ThresholdProgressiveAdaptiveRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,

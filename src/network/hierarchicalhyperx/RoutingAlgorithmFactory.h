@@ -33,6 +33,7 @@
 #include "network/hierarchicalhyperx/ProgressiveAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ProgressiveAdaptiveAverageRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ProgressiveAdaptiveAverageOffsetRoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/ProgressiveAdaptiveRandomRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveGRoutingAlgorithm.h"
 #include "network/RoutingAlgorithm.h"
