@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveRandomRoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/ProgressiveAdaptiveAverageRandomRoutingAlgorithm.h"
 
 #include <strop/strop.h>
 
@@ -28,8 +28,8 @@
 
 namespace HierarchicalHyperX {
 
-ProgressiveAdaptiveRandomRoutingAlgorithm::
-  ProgressiveAdaptiveRandomRoutingAlgorithm(
+ProgressiveAdaptiveAverageRandomRoutingAlgorithm::
+  ProgressiveAdaptiveAverageRandomRoutingAlgorithm(
     const std::string& _name, const Component* _parent, Router* _router,
     u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
@@ -47,10 +47,10 @@ ProgressiveAdaptiveRandomRoutingAlgorithm::
   assert(numVcs_ >= 2 * globalDimWidths_.size() + 3);
 }
 
-ProgressiveAdaptiveRandomRoutingAlgorithm::
-  ~ProgressiveAdaptiveRandomRoutingAlgorithm() {}
+ProgressiveAdaptiveAverageRandomRoutingAlgorithm::
+  ~ProgressiveAdaptiveAverageRandomRoutingAlgorithm() {}
 
-void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
+void ProgressiveAdaptiveAverageRandomRoutingAlgorithm::processRequest(
     Flit* _flit, RoutingAlgorithm::Response* _response) {
   // ex: [c,1,...,m,1,...,n]
   const std::vector<u32>* destinationAddress =
@@ -80,7 +80,7 @@ void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
   std::unordered_set<u32> outputPorts;
   // routing depends on mode
   if (ri->valiantMode == false) {
-    outputPorts = ProgressiveAdaptiveRandomRoutingAlgorithm::routing
+    outputPorts = ProgressiveAdaptiveAverageRandomRoutingAlgorithm::routing
       (_flit, *destinationAddress);
     assert(outputPorts.size() >= 1);
   } else {
@@ -144,7 +144,8 @@ void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
   assert(_response->size() > 0);
 }
 
-std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
+std::unordered_set<u32>
+  ProgressiveAdaptiveAverageRandomRoutingAlgorithm::routing(
     Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->address();
@@ -163,7 +164,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
     globalPortBase += ((globalDimWidths_.at(globalDim) - 1)
                        * globalDimWeights_.at(globalDim));
   }
-  /*  std::vector<u32> hardAdd;
+  /*    std::vector<u32> hardAdd;
       hardAdd.push_back(3);
       hardAdd.push_back(0);
       hardAdd.push_back(0);*/
@@ -224,17 +225,18 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
          itr != MINOutputPorts.end(); itr++) {
       NonMINOutputPorts.erase(*itr);
     }
+    f64 AverageAvailability = 0.0;
     int NonMINOutputSize = NonMINOutputPorts.size();
     assert(NonMINOutputSize > 0);
-    int NonMINRandom = gSim->rnd.nextU64(0, NonMINOutputSize - 1);
-    auto NonMINIt = NonMINOutputPorts.begin();
-    std::advance(NonMINIt, NonMINRandom);
-    int NonMINOutputPort = *(NonMINIt);
-    f64 NonMINAvailability = 0.0;
-    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
-         vc += 1) {
-      NonMINAvailability += router_->congestionStatus(NonMINOutputPort, vc);
+    for (auto NonMINIt = NonMINOutputPorts.begin(); NonMINIt !=
+           NonMINOutputPorts.end(); NonMINIt++) {
+      int NonMINOutputPort = *(NonMINIt);
+      for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
+           vc += 1) {
+        AverageAvailability += router_->congestionStatus(NonMINOutputPort, vc);
+      }
     }
+    AverageAvailability /= NonMINOutputSize;
 
     std::vector<u32> dstRouterAdd(_destinationAddress);
     dstRouterAdd.erase(dstRouterAdd.begin());
@@ -258,12 +260,11 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
       printf("NonMIN port is %u \n", NonMINOutputPort);
       printf("MINAvai = %f, NonMINAV = %f \n",
          MINAvailability, NonMINAvailability);
-      }*/
+     }*/
 
     // UGAL
     if (  // false
-         MINAvailability  <= NonMINAvailability * 2 + bias_
-         && MINAvailability < 0.999
+         MINAvailability  <= AverageAvailability * 2 + bias_
         ) {
       outputPorts = MINOutputPorts;
     } else {
@@ -288,7 +289,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
   return outputPorts;
 }
 
-u32 ProgressiveAdaptiveRandomRoutingAlgorithm::setIntermediateAdd(
+u32 ProgressiveAdaptiveAverageRandomRoutingAlgorithm::setIntermediateAdd(
     std::vector<u32>* re) const {
   const std::vector<u32>& routerAddress = router_->address();
 
