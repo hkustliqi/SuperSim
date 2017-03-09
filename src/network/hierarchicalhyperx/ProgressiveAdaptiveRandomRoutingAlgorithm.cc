@@ -37,13 +37,13 @@ ProgressiveAdaptiveRandomRoutingAlgorithm::
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
-    bool _randomGroup, f64 _bias)
+    bool _randomGroup, f64 _bias, f64 _threshold)
     : ValiantRoutingAlgorithm
       (_name, _parent,  _router, _latency, _baseVc, _numVcs,
        _globalDimensionWidths,
        _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
        _concentration, _globalLinksPerRouter, _randomGroup),
-      bias_(_bias) {
+      bias_(_bias), threshold_(_threshold) {
   assert(numVcs_ >= 2 * globalDimWidths_.size() + 3);
 }
 
@@ -163,8 +163,8 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
     globalPortBase += ((globalDimWidths_.at(globalDim) - 1)
                        * globalDimWeights_.at(globalDim));
   }
-  /*  std::vector<u32> hardAdd;
-      hardAdd.push_back(3);
+    std::vector<u32> hardAdd;
+    /*   hardAdd.push_back(3);
       hardAdd.push_back(0);
       hardAdd.push_back(0);*/
 
@@ -238,18 +238,18 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
 
     std::vector<u32> dstRouterAdd(_destinationAddress);
     dstRouterAdd.erase(dstRouterAdd.begin());
-    std::vector<u32> intermediateAdd(_destinationAddress);
+    // std::vector<u32> intermediateAdd(_destinationAddress);
     //  u32 MINPathLen = getHopDistance(routerAddress, dstRouterAdd,
     //  localDimWidths_, globalDimWidths_, globalDimWeights_);
-    setIntermediateAdd(&intermediateAdd);
-    intermediateAdd.erase(intermediateAdd.begin());
+    // setIntermediateAdd(&intermediateAdd);
+    // intermediateAdd.erase(intermediateAdd.begin());
     /* u32 NonMINPathLen = 0;
     NonMINPathLen += getHopDistance(routerAddress, intermediateAdd,
       localDimWidths_, globalDimWidths_, globalDimWeights_);
     NonMINPathLen += getHopDistance(intermediateAdd, dstRouterAdd,
     localDimWidths_, globalDimWidths_, globalDimWeights_); */
 
-    /*  if (router_->address() == hardAdd) {
+    /*  if (router_->address() == hardAdd && MINAvailability >= 0.05) {
       printf("Router address is %s \n",
          strop::vecString<u32>(routerAddress).c_str());
       printf("Dst address is %s \n",
@@ -258,17 +258,18 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
       printf("NonMIN port is %u \n", NonMINOutputPort);
       printf("MINAvai = %f, NonMINAV = %f \n",
          MINAvailability, NonMINAvailability);
-      }*/
+      } */
 
     // UGAL
     if (  // false
          MINAvailability  <= NonMINAvailability * 2 + bias_
-         && MINAvailability < 0.999
+         && MINAvailability < threshold_
         ) {
       outputPorts = MINOutputPorts;
     } else {
       ri->valiantMode = true;
       // reset LocalDst to current routerAddress
+      assert(ri->intermediateAddress == nullptr);
       assert(ri->localDst != nullptr);
       delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
       delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);

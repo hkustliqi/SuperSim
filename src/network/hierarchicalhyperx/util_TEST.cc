@@ -246,6 +246,27 @@ TEST(HierarchicalHyperXUtil, setLocalDst) {
       packet->getRoutingExtension());
   ASSERT_EQ(*(result->localDst), localDst);
   ASSERT_EQ(*(result->localDstPort), localDstPort);
+
+  globalOutputPorts.clear();
+  delete reinterpret_cast<const std::vector<u32>*>(result->localDst);
+  result->localDst = nullptr;
+  delete reinterpret_cast<const std::vector<u32>*>(result->localDstPort);
+  result->localDstPort = nullptr;
+  diffGlobalDims = {0};
+  dstAdd = {0, 0, 0, 20};
+  routerAdd = {0, 0, 0};
+  localDimWidth = {4, 5};
+  globalDimWidth = {41};
+  globalDimWeight = {1};
+  localDst = {3, 4};
+  localDstPort = {0};
+  HierarchicalHyperX::setLocalDst(diffGlobalDims, dstAdd, &globalOutputPorts,
+                                  packet, routerAdd, localDimWidth,
+                                  globalDimWidth, globalDimWeight);
+  result = reinterpret_cast<RoutingInfo*>(
+      packet->getRoutingExtension());
+  ASSERT_EQ(*(result->localDst), localDst);
+  ASSERT_EQ(*(result->localDstPort), localDstPort);
 }
 
 TEST(HierarchicalHyperXUtil, getHopDistance) {

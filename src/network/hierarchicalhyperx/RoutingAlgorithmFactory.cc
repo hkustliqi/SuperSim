@@ -105,7 +105,7 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
         localDimensionWeights_, concentration_, globalLinksPerRouter_,
-        randomGroup, bias);
+        randomGroup, bias, congestionThreshold);
   } else if (algorithm == "threshold_progressive_adaptive") {
     return new HierarchicalHyperX::ThresholdProgressiveAdaptiveRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,
