@@ -56,7 +56,6 @@ void ProgressiveAdaptiveAverageRandomRoutingAlgorithm::processRequest(
   const std::vector<u32>* destinationAddress =
       _flit->packet()->message()->getDestinationAddress();
   Packet* packet = _flit->packet();
-  const std::vector<u32>& routerAddress = router_->address();
 
   if (packet->getRoutingExtension() == nullptr) {
     RoutingInfo* ri = new RoutingInfo();
@@ -71,11 +70,6 @@ void ProgressiveAdaptiveAverageRandomRoutingAlgorithm::processRequest(
   }
   RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       packet->getRoutingExtension());
-
-  /*    std::vector<u32> hardAdd;
-      hardAdd.push_back(3);
-      hardAdd.push_back(4);
-      hardAdd.push_back(0); */
 
   std::unordered_set<u32> outputPorts;
   // routing depends on mode
@@ -117,7 +111,15 @@ void ProgressiveAdaptiveAverageRandomRoutingAlgorithm::processRequest(
       vcSet = 1;
     }
   } else {
-    vcSet = 1 + ri->globalHopCount;
+    if (ri->valiantMode == true) {
+      if (ri->intermediateDone == false) {
+        vcSet = 1 + ri->globalHopCount;
+      } else {
+        vcSet = 2 + ri->globalHopCount;
+      }
+    } else {
+      vcSet = 1 + ri->globalHopCount;
+    }
   }
 
   // format the response
@@ -164,10 +166,6 @@ std::unordered_set<u32>
     globalPortBase += ((globalDimWidths_.at(globalDim) - 1)
                        * globalDimWeights_.at(globalDim));
   }
-  /*    std::vector<u32> hardAdd;
-      hardAdd.push_back(3);
-      hardAdd.push_back(0);
-      hardAdd.push_back(0);*/
 
   std::vector<u32> globalOutputPorts;
   std::unordered_set<u32> outputPorts;
@@ -196,23 +194,24 @@ std::unordered_set<u32>
     int MINRandom = gSim->rnd.nextU64(0, MINOutputSize - 1);
     auto MINIt = MINOutputPorts.begin();
     std::advance(MINIt, MINRandom);
-    int MINOutputPort = *(MINIt);
+    u32 MINOutputPort = *(MINIt);
     f64 MINAvailability = 0.0;
-    /* if (router_->address() == hardAdd) {
-      printf("baseVc = %u \n", baseVc_);
-      for (u32 vc=0; vc < numVcs_; vc++) {
-        printf("vc = %u, availabitity = %f\n", vc,
-             router_->congestionStatus(MINOutputPort, vc));
-      }
-      } */
-    // found that the vc being used is offsetted by 2
-    // added +2 as a temporary fix
-    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
-        vc += 1) {
+
+    // select the right vc to evaluate
+    if (MINOutputPort >= getPortBase(concentration_, localDimWidths_,
+                                     localDimWeights_)) {
+      for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
+           vc += 2 * globalDimWidths_.size() + 3) {
       /*  if (router_->address() == hardAdd) {
       printf("checking vc %u\n", vc);
       }*/
-      MINAvailability += router_->congestionStatus(MINOutputPort, vc);
+        MINAvailability += router_->congestionStatus(MINOutputPort, vc);
+      }
+    } else {
+      for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
+           vc += 2 * globalDimWidths_.size() + 3) {
+        MINAvailability += router_->congestionStatus(MINOutputPort, vc);
+      }
     }
 
     std::unordered_set<u32> NonMINOutputPorts;
@@ -231,8 +230,8 @@ std::unordered_set<u32>
     for (auto NonMINIt = NonMINOutputPorts.begin(); NonMINIt !=
            NonMINOutputPorts.end(); NonMINIt++) {
       int NonMINOutputPort = *(NonMINIt);
-      for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
-           vc += 1) {
+      for (u32 vc = baseVc_ + 1; vc < baseVc_ + numVcs_;
+           vc += 2 * globalDimWidths_.size() + 3) {
         AverageAvailability += router_->congestionStatus(NonMINOutputPort, vc);
       }
     }
@@ -241,15 +240,23 @@ std::unordered_set<u32>
     std::vector<u32> dstRouterAdd(_destinationAddress);
     dstRouterAdd.erase(dstRouterAdd.begin());
     std::vector<u32> intermediateAdd(_destinationAddress);
-    //  u32 MINPathLen = getHopDistance(routerAddress, dstRouterAdd,
-    //  localDimWidths_, globalDimWidths_, globalDimWeights_);
-    setIntermediateAdd(&intermediateAdd);
+    u32 MINPathLen = getHopDistance(routerAddress, dstRouterAdd,
+       localDimWidths_, globalDimWidths_, globalDimWeights_);
+    // setIntermediateAdd(&intermediateAdd);
+    for (u32 idx = 0; idx < localDimWidths_.size(); idx++) {
+      intermediateAdd.at(idx + 1) =
+        gSim->rnd.nextU64(0, localDimWidths_.at(idx) - 1);
+    }
+    for (u32 idx = 0; idx < globalDimWidths_.size(); idx++) {
+      intermediateAdd.at(idx + localDimWidths_.size() + 1) =
+          gSim->rnd.nextU64(0, globalDimWidths_.at(idx) - 1);
+    }
     intermediateAdd.erase(intermediateAdd.begin());
-    /* u32 NonMINPathLen = 0;
+    u32 NonMINPathLen = 0;
     NonMINPathLen += getHopDistance(routerAddress, intermediateAdd,
       localDimWidths_, globalDimWidths_, globalDimWeights_);
     NonMINPathLen += getHopDistance(intermediateAdd, dstRouterAdd,
-    localDimWidths_, globalDimWidths_, globalDimWeights_); */
+    localDimWidths_, globalDimWidths_, globalDimWeights_);
 
     /*  if (router_->address() == hardAdd) {
       printf("Router address is %s \n",
@@ -263,8 +270,8 @@ std::unordered_set<u32>
      }*/
 
     // UGAL
-    if (  // false
-         MINAvailability  <= AverageAvailability * 2 + bias_
+    if (MINAvailability * MINPathLen <=
+          AverageAvailability * NonMINPathLen + bias_
         ) {
       outputPorts = MINOutputPorts;
     } else {
