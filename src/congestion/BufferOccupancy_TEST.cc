@@ -39,6 +39,7 @@ TEST(BufferOccupancy, statusCheck_VcMode) {
   Json::Value statusSettings;
   statusSettings["latency"] = latency;
   statusSettings["granularity"] = granularity;
+  statusSettings["minimum"] = 0.0;
   statusSettings["mode"] = "vc";
   BufferOccupancy status("CongestionStatus", &router, &router,
                          statusSettings);
@@ -101,6 +102,7 @@ TEST(BufferOccupancy, statusCheck_PortMode) {
   Json::Value statusSettings;
   statusSettings["latency"] = latency;
   statusSettings["granularity"] = granularity;
+  statusSettings["minimum"] = 0.0;
   statusSettings["mode"] = "port";
   BufferOccupancy status("CongestionStatus", &router, &router,
                          statusSettings);

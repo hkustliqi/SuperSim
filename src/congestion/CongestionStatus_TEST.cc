@@ -235,15 +235,19 @@ void StatusCheck::processEvent(void* _event, s32 _type) {
 
 /************************* Basic Base Class Tests *****************************/
 
-f64 expSts(u32 _curr, u32 _max, u32 _gran) {
+f64 expSts(u32 _curr, u32 _max, f64 _min, u32 _gran) {
   f64 value = ((f64)_max - (f64)_curr) / (f64)_max;
+  assert(value >= 0.0);
+  assert(value <= 1.0);
   if (_gran > 0) {
     value = round(value * _gran) / _gran;
   }
+  value = (value < _min) ? (_min) : (value);
+  assert(value >= _min);
   return value;
 }
 
-TEST(CongestionStatus, latencyAndGranularity) {
+TEST(CongestionStatus, latencyGranularityMinimum) {
   const bool debug = false;
 
   const u32 numPorts = 5;
@@ -251,93 +255,97 @@ TEST(CongestionStatus, latencyAndGranularity) {
 
   for (u32 latency = 1; latency <= 64; latency *= 2) {
     for (u32 granularity = 0; granularity <= 16; granularity += 2) {
-      // printf("latency=%u granularity=%u\n", latency, granularity);
+      for (f64 minimum = 0.0; minimum < 0.2; minimum += 0.1) {
+        // printf("lat=%u min=%f gran=%u\n\n", latency, minimum, granularity);
 
-      TestSetup setup(1, 1, 1234);
+        TestSetup setup(1, 1, 1234);
 
-      Json::Value routerSettings;
-      CongestionTestRouter router(
-          "Router", nullptr, 0, {}, numPorts, numVcs, nullptr, routerSettings);
-      router.setDebug(debug);
+        Json::Value routerSettings;
+        CongestionTestRouter router(
+            "Router", nullptr, 0, {}, numPorts, numVcs, nullptr,
+            routerSettings);
+        router.setDebug(debug);
 
-      Json::Value statusSettings;
-      statusSettings["latency"] = latency;
-      statusSettings["granularity"] = granularity;
-      CongestionStatusTest status("CongestionStatus", &router, &router,
-                                  statusSettings);
-      status.setDebug(debug);
+        Json::Value statusSettings;
+        statusSettings["latency"] = latency;
+        statusSettings["granularity"] = granularity;
+        statusSettings["minimum"] = minimum;
+        CongestionStatusTest status("CongestionStatus", &router, &router,
+                                    statusSettings);
+        status.setDebug(debug);
 
-      router.setCongestionStatus(&status);
+        router.setCongestionStatus(&status);
 
-      std::vector<u32> maxCredits(numPorts * numVcs);
-      std::vector<u32> currCredits(numPorts * numVcs);
-      for (u32 port = 0; port < numPorts; port++) {
-        for (u32 vc = 0; vc < numVcs; vc++) {
-          u32 max = port * 100 + vc + 1;
-          maxCredits.at(router.vcIndex(port, vc)) = max;
-          currCredits.at(router.vcIndex(port, vc)) = max;
-          status.initCredits(router.vcIndex(port, vc), max);
-        }
-      }
-
-      CreditHandler crediter("CreditHandler", nullptr, &status, &router);
-      crediter.setDebug(debug);
-
-      StatusCheck check("StatusCheck", nullptr, &status);
-      check.setDebug(debug);
-
-      // set status check events for all VCs at time 0
-      //  they should all be empty (status = 0.0)
-      for (u32 port = 0; port < numPorts; port++) {
-        for (u32 vc = 0; vc < numVcs; vc++) {
-          check.setEvent(0, 0, port, vc, 0.0);
-        }
-      }
-
-      for (u64 time = 1000; time < 2000; time++) {
-        // choose a random port-VC pair to target and INCR or DECR
-        u32 port = gSim->rnd.nextU64(0, numPorts - 1);
-        u32 vc = gSim->rnd.nextU64(0, numVcs - 1);
-        bool incr = gSim->rnd.nextBool();
-        u32 vcIdx = router.vcIndex(port, vc);
-        if (incr && currCredits.at(vcIdx) == maxCredits.at(vcIdx)) {
-          incr = false;
-        } else if (!incr && currCredits.at(vcIdx) == 0) {
-          incr = true;
+        std::vector<u32> maxCredits(numPorts * numVcs);
+        std::vector<u32> currCredits(numPorts * numVcs);
+        for (u32 port = 0; port < numPorts; port++) {
+          for (u32 vc = 0; vc < numVcs; vc++) {
+            u32 max = port * 100 + vc + 1;
+            maxCredits.at(router.vcIndex(port, vc)) = max;
+            currCredits.at(router.vcIndex(port, vc)) = max;
+            status.initCredits(router.vcIndex(port, vc), max);
+          }
         }
 
-        // set event for INCR or DECR
-        s32 type = incr ? CongestionStatus::INCR : CongestionStatus::DECR;
-        crediter.setEvent(port, vc, time, 1, type);
-        status.addExpectedEvent(port, vc, time + latency - 1, 2, type);
+        CreditHandler crediter("CreditHandler", nullptr, &status, &router);
+        crediter.setDebug(debug);
 
-        // update expected
-        if (incr) {
-          currCredits.at(vcIdx)++;
-        } else {
-          currCredits.at(vcIdx)--;
+        StatusCheck check("StatusCheck", nullptr, &status);
+        check.setDebug(debug);
+
+        // set status check events for all VCs at time 0
+        //  they should all be empty (status = minimum)
+        for (u32 port = 0; port < numPorts; port++) {
+          for (u32 vc = 0; vc < numVcs; vc++) {
+            check.setEvent(0, 0, port, vc, minimum);
+          }
         }
 
-        // set event to check status value
-        f64 exp = expSts(currCredits.at(vcIdx), maxCredits.at(vcIdx),
-                         granularity);
-        check.setEvent(time + latency, 0, port, vc, exp);
-      }
-
-      // set status check events for all VCs at time 'FINISH'
-      for (u32 port = 0; port < numPorts; port++) {
-        for (u32 vc = 0; vc < numVcs; vc++) {
+        for (u64 time = 1000; time < 2000; time++) {
+          // choose a random port-VC pair to target and INCR or DECR
+          u32 port = gSim->rnd.nextU64(0, numPorts - 1);
+          u32 vc = gSim->rnd.nextU64(0, numVcs - 1);
+          bool incr = gSim->rnd.nextBool();
           u32 vcIdx = router.vcIndex(port, vc);
+          if (incr && currCredits.at(vcIdx) == maxCredits.at(vcIdx)) {
+            incr = false;
+          } else if (!incr && currCredits.at(vcIdx) == 0) {
+            incr = true;
+          }
+
+          // set event for INCR or DECR
+          s32 type = incr ? CongestionStatus::INCR : CongestionStatus::DECR;
+          crediter.setEvent(port, vc, time, 1, type);
+          status.addExpectedEvent(port, vc, time + latency - 1, 2, type);
+
+          // update expected
+          if (incr) {
+            currCredits.at(vcIdx)++;
+          } else {
+            currCredits.at(vcIdx)--;
+          }
+
+          // set event to check status value
           f64 exp = expSts(currCredits.at(vcIdx), maxCredits.at(vcIdx),
-                           granularity);
-          check.setEvent(1000000, 0, port, vc, exp);
+                           minimum, granularity);
+          check.setEvent(time + latency, 0, port, vc, exp);
         }
+
+        // set status check events for all VCs at time 'FINISH'
+        for (u32 port = 0; port < numPorts; port++) {
+          for (u32 vc = 0; vc < numVcs; vc++) {
+            u32 vcIdx = router.vcIndex(port, vc);
+            f64 exp = expSts(currCredits.at(vcIdx), maxCredits.at(vcIdx),
+                             minimum, granularity);
+            check.setEvent(1000000, 0, port, vc, exp);
+          }
+        }
+
+        gSim->simulate();
+
+        ASSERT_TRUE(status.ok());
+        ASSERT_TRUE(status.done());
       }
-
-      gSim->simulate();
-
-      ASSERT_TRUE(status.ok());
-      ASSERT_TRUE(status.done());
     }
   }
 }

@@ -82,27 +82,20 @@ void PhantomBufferOccupancy::performDecrementCredit(u32 _port, u32 _vc) {
 f64 PhantomBufferOccupancy::computeStatus(u32 _port, u32 _vc) const {
   switch (mode_) {
     case PhantomBufferOccupancy::Mode::kVc: {
-      // return this VC's status
-      u32 vcIdx = device_->vcIndex(_port, _vc);
-      f64 status = (((f64)maximums_.at(vcIdx) - (f64)counts_.at(vcIdx) -
-                     (f64)windows_.at(vcIdx) * valueCoeff_) /
-                    (f64)maximums_.at(vcIdx));
-      return std::min(1.0, std::max(0.0, status));
+      return vcStatus(_port, _vc);
       break;
     }
 
     case PhantomBufferOccupancy::Mode::kPort: {
-      // return the average status of all VCs in this port
-      u32 curSum = 0;
-      u32 maxSum = 0;
-      for (u32 vc = 0; vc < numVcs_; vc++) {
-        u32 vcIdx = device_->vcIndex(_port, vc);
-        curSum += ((f64)maximums_.at(vcIdx) - (f64)counts_.at(vcIdx) -
-                   (f64)windows_.at(vcIdx) * valueCoeff_);
-        maxSum += (f64)maximums_.at(vcIdx);
-      }
-      return std::min(1.0, std::max(0.0, (f64)curSum / (f64)maxSum));
+      return portAverageStatus(_port);
       break;
+    }
+
+    case PhantomBufferOccupancy::Mode::kBimodal: {
+      // return the congestion status according to a bimodal combination
+      f64 vcSts = vcStatus(_port, _vc);
+      f64 portSts = portAverageStatus(_port);
+      return vcSts * vcSts + (1 - vcSts) * portSts;
     }
 
     default:
@@ -117,7 +110,31 @@ PhantomBufferOccupancy::Mode PhantomBufferOccupancy::parseMode(
     return PhantomBufferOccupancy::Mode::kVc;
   } else if (_mode == "port") {
     return  PhantomBufferOccupancy::Mode::kPort;
+  } else if (_mode == "bimodal") {
+    return  PhantomBufferOccupancy::Mode::kBimodal;
   } else {
     assert(false);
   }
+}
+
+f64 PhantomBufferOccupancy::vcStatus(u32 _port, u32 _vc) const {
+  // return this VC's status
+  u32 vcIdx = device_->vcIndex(_port, _vc);
+  f64 status = (((f64)maximums_.at(vcIdx) - (f64)counts_.at(vcIdx) -
+                 (f64)windows_.at(vcIdx) * valueCoeff_) /
+                (f64)maximums_.at(vcIdx));
+  return std::min(1.0, std::max(0.0, status));
+}
+
+f64 PhantomBufferOccupancy::portAverageStatus(u32 _port) const {
+  // return the average status of all VCs in this port
+  u32 curSum = 0;
+  u32 maxSum = 0;
+  for (u32 vc = 0; vc < numVcs_; vc++) {
+    u32 vcIdx = device_->vcIndex(_port, vc);
+    curSum += ((f64)maximums_.at(vcIdx) - (f64)counts_.at(vcIdx) -
+               (f64)windows_.at(vcIdx) * valueCoeff_);
+    maxSum += (f64)maximums_.at(vcIdx);
+  }
+  return std::min(1.0, std::max(0.0, (f64)curSum / (f64)maxSum));
 }

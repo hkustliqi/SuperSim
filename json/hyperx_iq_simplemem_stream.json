@@ -48,6 +48,7 @@
         "algorithm": "buffer_occupancy",
         "latency": 1,
         "granularity": 0,
+        "minimum": 0.0,
         "mode": "port"
       },
       "input_queue_depth": 16,

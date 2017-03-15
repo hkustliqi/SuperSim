@@ -54,23 +54,20 @@ void BufferOccupancy::performDecrementCredit(u32 _port, u32 _vc) {
 f64 BufferOccupancy::computeStatus(u32 _port, u32 _vc) const {
   switch (mode_) {
     case BufferOccupancy::Mode::kVc: {
-      // return this VC's status
-      u32 vcIdx = device_->vcIndex(_port, _vc);
-      return ((f64)maximums_.at(vcIdx) - (f64)counts_.at(vcIdx)) /
-          (f64)maximums_.at(vcIdx);
+      return vcStatus(_port, _vc);
       break;
     }
 
     case BufferOccupancy::Mode::kPort: {
-      // return the average status of all VCs in this port
-      u32 curSum = 0;
-      u32 maxSum = 0;
-      for (u32 vc = 0; vc < numVcs_; vc++) {
-        u32 vcIdx = device_->vcIndex(_port, vc);
-        curSum += maximums_.at(vcIdx) - counts_.at(vcIdx);
-        maxSum += maximums_.at(vcIdx);
-      }
-      return (f64)curSum / (f64)maxSum;
+      return portAverageStatus(_port);
+      break;
+    }
+
+    case BufferOccupancy::Mode::kBimodal: {
+      // return the congestion status according to a bimodal combination
+      f64 vcSts = vcStatus(_port, _vc);
+      f64 portSts = portAverageStatus(_port);
+      return vcSts * vcSts + (1 - vcSts) * portSts;
       break;
     }
 
@@ -85,7 +82,28 @@ BufferOccupancy::Mode BufferOccupancy::parseMode(const std::string& _mode) {
     return BufferOccupancy::Mode::kVc;
   } else if (_mode == "port") {
     return  BufferOccupancy::Mode::kPort;
+  } else if (_mode == "bimodal") {
+    return  BufferOccupancy::Mode::kBimodal;
   } else {
     assert(false);
   }
+}
+
+f64 BufferOccupancy::vcStatus(u32 _port, u32 _vc) const {
+  // return this VC's status
+  u32 vcIdx = device_->vcIndex(_port, _vc);
+  return ((f64)maximums_.at(vcIdx) - (f64)counts_.at(vcIdx)) /
+      (f64)maximums_.at(vcIdx);
+}
+
+f64 BufferOccupancy::portAverageStatus(u32 _port) const {
+  // return the average status of all VCs in this port
+  u32 curSum = 0;
+  u32 maxSum = 0;
+  for (u32 vc = 0; vc < numVcs_; vc++) {
+    u32 vcIdx = device_->vcIndex(_port, vc);
+    curSum += maximums_.at(vcIdx) - counts_.at(vcIdx);
+    maxSum += maximums_.at(vcIdx);
+  }
+  return (f64)curSum / (f64)maxSum;
 }
