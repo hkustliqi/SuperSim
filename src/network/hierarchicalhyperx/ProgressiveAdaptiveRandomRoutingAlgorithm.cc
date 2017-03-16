@@ -254,7 +254,8 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
              router_->congestionStatus(NonMINOutputPort, vc));
       }
       }*/
-    if (MINOutputPort >= getPortBase(concentration_, localDimWidths_,
+    if (*NonMINOutputPorts.begin() >=
+        getPortBase(concentration_, localDimWidths_,
                                      localDimWeights_)) {
       for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
            vc += 2 * globalDimWidths_.size() + 3) {
