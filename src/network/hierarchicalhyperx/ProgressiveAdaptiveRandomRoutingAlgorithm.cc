@@ -296,19 +296,17 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
 
     // UGAL
     if (  // false
-         MINAvailability * MINPathLen <=
+         MINAvailability * MINPathLen <
          (NonMINAvailability + 0.01) * NonMINPathLen + bias_
         ) {
-      outputPorts =  DimOrderRoutingAlgorithm::routing(
-        _flit, _destinationAddress);;
+      assert(ri->intermediateAddress != nullptr);
+      outputPorts =  MINOutputPorts;
     } else {
       ri->valiantMode = true;
       // intermediate Add has been set
       assert(ri->intermediateAddress != nullptr);
-
       // switch to valiant
-      outputPorts = ValiantRoutingAlgorithm::routing(
-                    _flit, _destinationAddress, randomGroup_);
+      outputPorts = NonMINOutputPorts;
     }
 
   } else {
