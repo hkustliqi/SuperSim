@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NETWORK_HIERARCHICALHYPERX_GLOBALANDLOCALRANDOMROUTINGALGORITHM_H_
-#define NETWORK_HIERARCHICALHYPERX_GLOBALANDLOCALRANDOMROUTINGALGORITHM_H_
+#ifndef NETWORK_HIERARCHICALHYPERX_PROGRESSIVEADAPTIVEGLRANDOMROUTINGALGORITHM_H_
+#define NETWORK_HIERARCHICALHYPERX_PROGRESSIVEADAPTIVEGLRANDOMROUTINGALGORITHM_H_
 
 #include <prim/prim.h>
 
@@ -23,37 +23,38 @@
 
 #include "event/Component.h"
 #include "network/RoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/ValiantRandomRoutingAlgorithm.h"
 #include "router/Router.h"
 
 namespace HierarchicalHyperX {
 
-class GlobalAndLocalRandomRoutingAlgorithm : public RoutingAlgorithm {
+class ProgressiveAdaptiveGLRandomRoutingAlgorithm : public
+  ValiantRandomRoutingAlgorithm {
  public:
-  GlobalAndLocalRandomRoutingAlgorithm(
-    const std::string& _name, const Component* _parent, Router* _router,
-    u64 _latency, u32 _baseVc, u32 _numVcs,
+  ProgressiveAdaptiveGLRandomRoutingAlgorithm(
+    const std::string& _name, const Component* _parent,
+    Router* _router, u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
-    u32 _concentration, u32 _globalLinksPerRouter);
-  ~GlobalAndLocalRandomRoutingAlgorithm();
+    u32 _concentration, u32 _globalLinksPerRouter,
+    bool _randomGroup, f64 _bias, f64 _threshold);
+
+  ~ProgressiveAdaptiveGLRandomRoutingAlgorithm();
 
  protected:
   void processRequest(
       Flit* _flit, RoutingAlgorithm::Response* _response) override;
 
+ private:
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress) const;
-
-  const std::vector<u32> globalDimWidths_;
-  const std::vector<u32> globalDimWeights_;
-  const std::vector<u32> localDimWidths_;
-  const std::vector<u32> localDimWeights_;
-  const u32 concentration_;
-  const u32 globalLinksPerRouter_;
+  u32 setIntermediateAdd(std::vector<u32>* re) const;
+  const f64 bias_;
+  const f64 threshold_;
 };
 
 }  // namespace HierarchicalHyperX
 
-#endif  // NETWORK_HIERARCHICALHYPERX_GLOBALANDLOCALRANDOMROUTINGALGORITHM_H_
+#endif  // NETWORK_HIERARCHICALHYPERX_PROGRESSIVEADAPTIVEGLRANDOMROUTINGALGORITHM_H_

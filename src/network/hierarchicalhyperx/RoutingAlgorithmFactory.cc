@@ -106,6 +106,12 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
         localDimensionWeights_, concentration_, globalLinksPerRouter_,
         randomGroup, bias, congestionThreshold);
+  } else if (algorithm == "progressive_adaptive_gl_random") {
+    return new HierarchicalHyperX::ProgressiveAdaptiveGLRandomRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_,
+        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
+        localDimensionWeights_, concentration_, globalLinksPerRouter_,
+        randomGroup, bias, congestionThreshold);
   } else if (algorithm == "threshold_progressive_adaptive") {
     return new HierarchicalHyperX::ThresholdProgressiveAdaptiveRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveRandomRoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/ProgressiveAdaptiveGLRandomRoutingAlgorithm.h"
 
 #include <strop/strop.h>
 
@@ -28,8 +28,8 @@
 
 namespace HierarchicalHyperX {
 
-ProgressiveAdaptiveRandomRoutingAlgorithm::
-  ProgressiveAdaptiveRandomRoutingAlgorithm(
+ProgressiveAdaptiveGLRandomRoutingAlgorithm::
+  ProgressiveAdaptiveGLRandomRoutingAlgorithm(
     const std::string& _name, const Component* _parent, Router* _router,
     u64 _latency, u32 _baseVc, u32 _numVcs,
     const std::vector<u32>& _globalDimensionWidths,
@@ -38,7 +38,7 @@ ProgressiveAdaptiveRandomRoutingAlgorithm::
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
     bool _randomGroup, f64 _bias, f64 _threshold)
-    : ValiantRoutingAlgorithm
+    : ValiantRandomRoutingAlgorithm
       (_name, _parent,  _router, _latency, _baseVc, _numVcs,
        _globalDimensionWidths,
        _globalDimensionWeights, _localDimensionWidths, _localDimensionWeights,
@@ -47,10 +47,10 @@ ProgressiveAdaptiveRandomRoutingAlgorithm::
   assert(numVcs_ >= 2 * globalDimWidths_.size() + 3);
 }
 
-ProgressiveAdaptiveRandomRoutingAlgorithm::
-  ~ProgressiveAdaptiveRandomRoutingAlgorithm() {}
+ProgressiveAdaptiveGLRandomRoutingAlgorithm::
+  ~ProgressiveAdaptiveGLRandomRoutingAlgorithm() {}
 
-void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
+void ProgressiveAdaptiveGLRandomRoutingAlgorithm::processRequest(
     Flit* _flit, RoutingAlgorithm::Response* _response) {
   // ex: [c,1,...,m,1,...,n]
   const std::vector<u32>* destinationAddress =
@@ -74,14 +74,14 @@ void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
   std::unordered_set<u32> outputPorts;
   // routing depends on mode
   if (ri->valiantMode == false) {
-    outputPorts = ProgressiveAdaptiveRandomRoutingAlgorithm::routing
+    outputPorts = ProgressiveAdaptiveGLRandomRoutingAlgorithm::routing
       (_flit, *destinationAddress);
     assert(outputPorts.size() >= 1);
   } else {
     // use Valiant routing
     assert(ri->intermediateAddress != nullptr);
 
-    outputPorts = ValiantRoutingAlgorithm::routing(
+    outputPorts = ValiantRandomRoutingAlgorithm::routing(
                     _flit, *destinationAddress, randomGroup_);
     assert(outputPorts.size() >= 1);
   }
@@ -157,7 +157,7 @@ void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
   assert(_response->size() > 0);
 }
 
-std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
+std::unordered_set<u32> ProgressiveAdaptiveGLRandomRoutingAlgorithm::routing(
     Flit* _flit, const std::vector<u32>& _destinationAddress) const {
   // ex: [1,...,m,1,...,n]
   const std::vector<u32>& routerAddress = router_->address();
@@ -195,7 +195,8 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
     }
 
     // UGAL
-    std::unordered_set<u32> MINOutputPorts = DimOrderRoutingAlgorithm::routing(
+    std::unordered_set<u32> MINOutputPorts =
+      GlobalAndLocalRandomRoutingAlgorithm::routing(
         _flit, _destinationAddress);
 
     // choose random port to evaluate queue size
@@ -228,7 +229,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
     ri->localDst = nullptr;
     ri->localDstPort = nullptr;
     std::unordered_set<u32> NonMINOutputPorts =
-      ValiantRoutingAlgorithm::routing(_flit,
+      ValiantRandomRoutingAlgorithm::routing(_flit,
                                        _destinationAddress, randomGroup_);
     assert(NonMINOutputPorts.size() > 0);
     assert(ri->localDst != nullptr);
@@ -303,14 +304,14 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
 
   } else {
     // not in first group, just use dimension order
-    return DimOrderRoutingAlgorithm::routing(
+    return GlobalAndLocalRandomRoutingAlgorithm::routing(
         _flit, _destinationAddress);
   }
   assert(outputPorts.size() >= 1);
   return outputPorts;
 }
 
-u32 ProgressiveAdaptiveRandomRoutingAlgorithm::setIntermediateAdd(
+u32 ProgressiveAdaptiveGLRandomRoutingAlgorithm::setIntermediateAdd(
     std::vector<u32>* re) const {
   const std::vector<u32>& routerAddress = router_->address();
 
