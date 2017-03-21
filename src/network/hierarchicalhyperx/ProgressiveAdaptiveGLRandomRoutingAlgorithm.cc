@@ -223,20 +223,22 @@ std::unordered_set<u32> ProgressiveAdaptiveGLRandomRoutingAlgorithm::routing(
     }
 
     // remove local dst for Non MIN routing
-    assert(ri->localDst != nullptr);
-    delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
-    delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
-    ri->localDst = nullptr;
-    ri->localDstPort = nullptr;
+    if (ri->localDst != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      ri->localDst = nullptr;
+      ri->localDstPort = nullptr;
+    }
     std::unordered_set<u32> NonMINOutputPorts =
       ValiantRandomRoutingAlgorithm::routing(_flit,
                                        _destinationAddress, randomGroup_);
     assert(NonMINOutputPorts.size() > 0);
-    assert(ri->localDst != nullptr);
-    delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
-    delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
-    ri->localDst = nullptr;
-    ri->localDstPort = nullptr;
+    if (ri->localDst != nullptr) {
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
+      delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
+      ri->localDst = nullptr;
+      ri->localDstPort = nullptr;
+    }
     int NonMINRandom = gSim->rnd.nextU64(0, NonMINOutputPorts.size() - 1);
     auto NonMINIt = NonMINOutputPorts.begin();
     std::advance(NonMINIt, NonMINRandom);
