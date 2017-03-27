@@ -274,6 +274,10 @@ std::unordered_set<u32> ProgressiveAdaptiveRoutingAlgorithm::routing(
     for (u32 localPort = concentration_; localPort < maxPort; localPort++) {
       NonMINOutputPorts.insert(localPort);
     }
+    for (auto itr = MINOutputPorts.begin();
+         itr != MINOutputPorts.end(); itr++) {
+      NonMINOutputPorts.erase(*itr);
+    }
     int NonMINOutputSize = NonMINOutputPorts.size();
     assert(NonMINOutputSize > 0);
     int NonMINRandom = gSim->rnd.nextU64(0, NonMINOutputSize - 1);
