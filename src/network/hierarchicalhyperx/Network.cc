@@ -157,7 +157,7 @@ Network::Network(const std::string& _name, const Component* _parent,
               strop::vecString<u32>(routerAddress) + "-to-" +
               strop::vecString<u32>(destinationAddress) +
               "-" + std::to_string(weight);
-          Channel* channel = new Channel(channelName, this,
+          Channel* channel = new Channel(channelName, this, numVcs_,
                                          _settings["internal_local_channel"]);
           localChannels_.push_back(channel);
 
@@ -259,7 +259,7 @@ Network::Network(const std::string& _name, const Component* _parent,
               strop::vecString<u32>(srcAddress) + "-to-" +
               strop::vecString<u32>(dstAddress) +
               "-" + std::to_string(weight);
-          Channel* channel = new Channel(channelName, this,
+          Channel* channel = new Channel(channelName, this, numVcs_,
                                          _settings["internal_global_channel"]);
           globalChannels_.push_back(channel);
 
@@ -317,9 +317,9 @@ Network::Network(const std::string& _name, const Component* _parent,
       std::string outChannelName = "Channel_" +
           strop::vecString<u32>(routerAddress) + "-to-" +
           strop::vecString<u32>(interfaceAddress);
-      Channel* inChannel = new Channel(inChannelName, this,
+      Channel* inChannel = new Channel(inChannelName, this, numVcs_,
                                        _settings["external_channel"]);
-      Channel* outChannel = new Channel(outChannelName, this,
+      Channel* outChannel = new Channel(outChannelName, this, numVcs_,
                                         _settings["external_channel"]);
       externalChannels_.push_back(inChannel);
       externalChannels_.push_back(outChannel);
