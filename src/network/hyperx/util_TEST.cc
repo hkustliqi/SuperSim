@@ -30,6 +30,8 @@
 #include "router/Router.h"
 #include "test/TestSetup_TEST.h"
 
+namespace {
+
 Json::Value makeJSON(u32 _numPorts, u32 _numVcs) {
   Json::Value settings;
   settings["num_ports"] = _numPorts;
@@ -150,6 +152,7 @@ void intNodeTest(const std::vector<u32>& _sourceRouter,
                         _refNumBuckets, _idSet, congStatus, _intNodeAlgFunc);
 }
 
+/*
 void singleRoutingTest(
     const std::vector<u32>& _sourceRouter,
     const std::vector<u32>* _destinationTerminal,
@@ -172,6 +175,7 @@ void singleRoutingTest(
   ASSERT_EQ(_refOutputPorts, outputPorts);
   delete router;
 }
+*/
 
 void distRoutingTest(
     const std::vector<u32>& _sourceRouter,
@@ -269,6 +273,9 @@ void distRoutingTest(
 
   ASSERT_NEAR(stdDev, 0.0, 0.015);
 }
+
+}  // namespace
+
 
 TEST(HyperXUtil, isDestinationRouter) {
   TestSetup ts(1, 1, 0xBAADF00D);

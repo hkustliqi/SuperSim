@@ -32,6 +32,8 @@
 #include "test/TestSetup_TEST.h"
 #include "types/Packet.h"
 
+namespace {
+
 struct RoutingInfo {
   std::vector<u32>* intermediateAddress;
   std::vector<u32>* localDst;
@@ -72,7 +74,7 @@ class TestRouter : public Router {
   std::unordered_map<u32, f64> congStatus_;
 };
 
-
+}  // namespace
 
 
 TEST(HierarchicalHyperXUtil, globalPortToLocalAddress) {
