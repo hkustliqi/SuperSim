@@ -64,6 +64,7 @@ class CongestionStatus : public Component, public CreditWatcher {
 
   const u32 latency_;
   const u32 granularity_;
+  const f64 minimum_;
 };
 
 #endif  // CONGESTION_CONGESTIONSTATUS_H_

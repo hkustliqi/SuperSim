@@ -19,6 +19,9 @@
         "num_vcs": 4,
         "routing": {
           "algorithm": "dimension_order",
+          "output_type": "vc",
+          "output_algorithm": "random",
+          "max_outputs": 1,
           "latency": 1
         }
       },

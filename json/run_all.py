@@ -32,6 +32,13 @@ def bad(s):
     print('  ' + s)
 
 def main(args):
+  # check if make is up to date
+  try:
+    subprocess.check_call('make --question', shell=True)
+  except subprocess.CalledProcessError as ex:
+    print('Make is out of date. Run \'make\' before running tests.')
+    return -1
+
   total_cpus = args.cpus
   if total_cpus == None:
     total_cpus = os.cpu_count()
@@ -55,7 +62,7 @@ def main(args):
   cob = taskrun.FileCleanupObserver()
   tm = taskrun.TaskManager(resource_manager=rm,
                            observers=[vob,cob],
-                           failure_mode='passive_fail')
+                           failure_mode='active_continue')
 
   # find all files
   settingsFiles = glob.glob('json/{0}.json'.format(args.glob))

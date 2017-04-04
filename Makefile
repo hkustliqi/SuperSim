@@ -15,7 +15,9 @@ HEADER_DIRS   := \
 	$(LIBS_LOC)libjson/inc \
 	$(LIBS_LOC)libsettings/inc \
 	$(LIBS_LOC)libstrop/inc \
+	$(LIBS_LOC)libcolhash/inc \
 	$(LIBS_LOC)libfio/inc
+
 STATIC_LIBS   := \
 	$(LIBS_LOC)libprim/bld/libprim.a \
 	$(LIBS_LOC)librnd/bld/librnd.a \
@@ -24,7 +26,9 @@ STATIC_LIBS   := \
 	$(LIBS_LOC)libjson/bld/libjson.a \
 	$(LIBS_LOC)libsettings/bld/libsettings.a \
 	$(LIBS_LOC)libstrop/bld/libstrop.a \
+	$(LIBS_LOC)libcolhash/bld/libcolhash.a \
 	$(LIBS_LOC)libfio/bld/libfio.a
+
 
 #--------------------- Cpp Lint -----------------------------------------------#
 LINT          := $(HOME)/.makeccpp/cpplint/cpplint.py

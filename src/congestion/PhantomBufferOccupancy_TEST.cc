@@ -51,6 +51,7 @@ TEST(PhantomBufferOccupancy, statusCheck) {
         Json::Value statusSettings;
         statusSettings["latency"] = statusLatency;
         statusSettings["granularity"] = granularity;
+        statusSettings["minimum"] = 0.0;
         statusSettings["value_coeff"] = valueCoeff;
         statusSettings["length_coeff"] = lengthCoeff;
         statusSettings["mode"] = "vc";

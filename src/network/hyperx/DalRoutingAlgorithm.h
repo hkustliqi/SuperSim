@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NETWORK_HYPERX_DIMORDERROUTINGALGORITHM_H_
-#define NETWORK_HYPERX_DIMORDERROUTINGALGORITHM_H_
+#ifndef NETWORK_HYPERX_DALROUTINGALGORITHM_H_
+#define NETWORK_HYPERX_DALROUTINGALGORITHM_H_
 
 #include <colhash/tuplehash.h>
 #include <json/json.h>
@@ -32,15 +32,16 @@
 
 namespace HyperX {
 
-class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
+class DalRoutingAlgorithm : public RoutingAlgorithm {
  public:
-  DimOrderRoutingAlgorithm(
-      const std::string& _name, const Component* _parent, Router* _router,
-      u64 _latency, u32 _baseVc, u32 _numVcs,
-      const std::vector<u32>& _dimensionWidths,
-      const std::vector<u32>& _dimensionWeights,
-      u32 _concentration, Json::Value _settings);
-  ~DimOrderRoutingAlgorithm();
+  DalRoutingAlgorithm(const std::string& _name, const Component* _parent,
+                      Router* _router, u64 _latency, u32 _baseVc, u32 _numVcs,
+                      const std::vector<u32>& _dimensionWidths,
+                      const std::vector<u32>& _dimensionWeights,
+                      u32 _concentration, u32 _inputPort,
+                      Json::Value _settings);
+  ~DalRoutingAlgorithm();
+  void vcScheduled(Flit* _flit, u32 _port, u32 _vc);
 
  protected:
   void processRequest(Flit* _flit,
@@ -50,13 +51,27 @@ class DimOrderRoutingAlgorithm : public RoutingAlgorithm {
   const std::vector<u32> dimensionWidths_;
   const std::vector<u32> dimensionWeights_;
   const u32 concentration_;
+  const u32 inputPort_;
+
+  u32 numVcSets_;
   u32 maxOutputs_;
   OutputAlg outputAlg_;
+  f64 threshold_;
+  f64 iBias_;
+  f64 cBias_;
+
   bool outputTypePort_;
+  AdaptiveRoutingAlg adaptivityType_;
+  DecisionScheme decisionScheme_;
+  bool multiDeroute_;
+  u32 maxHopsAllowed_;
+
+  std::unordered_set<std::tuple<u32, u32, f64>> outputVcsMin_;
+  std::unordered_set<std::tuple<u32, u32, f64>> outputVcsDer_;
   std::unordered_set<std::tuple<u32, u32, f64>> vcPool_;
   std::unordered_set<std::tuple<u32, u32, f64>> outputPorts_;
 };
 
 }  // namespace HyperX
 
-#endif  // NETWORK_HYPERX_DIMORDERROUTINGALGORITHM_H_
+#endif  // NETWORK_HYPERX_DALROUTINGALGORITHM_H_

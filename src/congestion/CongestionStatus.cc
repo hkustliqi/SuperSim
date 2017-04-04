@@ -18,6 +18,8 @@
 #include <cassert>
 #include <cmath>
 
+#include <algorithm>
+
 #include "router/Router.h"
 
 CongestionStatus::CongestionStatus(
@@ -26,9 +28,12 @@ CongestionStatus::CongestionStatus(
     : Component(_name, _parent), device_(_device),
       numPorts_(device_->numPorts()), numVcs_(device_->numVcs()),
       latency_(_settings["latency"].asUInt()),
-      granularity_(_settings["granularity"].asUInt()) {
+      granularity_(_settings["granularity"].asUInt()),
+      minimum_(_settings["minimum"].asDouble()) {
   assert(latency_ > 0);
   assert(!_settings["granularity"].isNull());
+  assert(!_settings["minimum"].isNull());
+  assert(minimum_ >= 0.0 && minimum_ <= 1.0);
 }
 
 CongestionStatus::~CongestionStatus() {}
@@ -53,12 +58,22 @@ void CongestionStatus::decrementCredit(u32 _vcIdx) {
 
 f64 CongestionStatus::status(u32 _port, u32 _vc) const {
   assert(gSim->epsilon() == 0);
+
+  // gather value from subclass
   f64 value = computeStatus(_port, _vc);
+
+  // check bounds
   assert(value >= 0.0);
   assert(value <= 1.0);
+
+  // apply granularization
   if (granularity_ > 0) {
     value = round(value * granularity_) / granularity_;
   }
+
+  // apply minimum constraint
+  value = std::max(minimum_, value);
+
   return value;
 }
 

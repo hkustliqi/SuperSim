@@ -31,6 +31,7 @@
         "algorithm": "buffer_occupancy",
         "latency": 1,
         "granularity": 8,
+        "minimum": 0.0,
         "mode": "vc"
       },
       "input_queue_depth": 16,

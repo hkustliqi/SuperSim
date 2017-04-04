@@ -18,6 +18,7 @@
 #include <cassert>
 
 #include "arbiter/ComparingArbiter.h"
+#include "arbiter/DualStageClassArbiter.h"
 #include "arbiter/LruArbiter.h"
 #include "arbiter/LslpArbiter.h"
 #include "arbiter/RandomArbiter.h"
@@ -38,6 +39,8 @@ Arbiter* ArbiterFactory::createArbiter(
     return new RandomArbiter(_name, _parent, _size, _settings);
   } else if (type == "random_priority") {
     return new RandomPriorityArbiter(_name, _parent, _size, _settings);
+  } else if (type == "dual_stage_class") {
+    return new DualStageClassArbiter(_name, _parent, _size, _settings);
   } else {
     fprintf(stderr, "unknown Arbiter 'type': %s\n", type.c_str());
     assert(false);

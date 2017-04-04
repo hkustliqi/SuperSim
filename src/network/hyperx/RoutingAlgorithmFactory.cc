@@ -18,6 +18,13 @@
 #include <cassert>
 
 #include "network/hyperx/DimOrderRoutingAlgorithm.h"
+#include "network/hyperx/MinRoutingAlgorithm.h"
+#include "network/hyperx/ValiantsRoutingAlgorithm.h"
+#include "network/hyperx/LeastCongestedQueueRoutingAlgorithm.h"
+#include "network/hyperx/UgalRoutingAlgorithm.h"
+#include "network/hyperx/DalRoutingAlgorithm.h"
+#include "network/hyperx/SkippingDimensionsRoutingAlgorithm.h"
+
 #include "network/RoutingAlgorithm.h"
 
 namespace HyperX {
@@ -41,7 +48,31 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
   if (algorithm == "dimension_order") {
     return new HyperX::DimOrderRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_, dimensionWidths_,
-        dimensionWeights_, concentration_);
+        dimensionWeights_, concentration_, settings_);
+  } else if (algorithm == "unordered_minimal") {
+    return new HyperX::MinRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_, dimensionWidths_,
+        dimensionWeights_, concentration_, settings_);
+  } else if (algorithm == "valiants") {
+    return new HyperX::ValiantsRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_, dimensionWidths_,
+        dimensionWeights_, concentration_, settings_);
+  } else if (algorithm == "least_congested_queue") {
+    return new HyperX::LeastCongestedQueueRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_, dimensionWidths_,
+        dimensionWeights_, concentration_, settings_);
+  } else if (algorithm == "universal_global_adaptive") {
+    return new HyperX::UgalRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_, dimensionWidths_,
+        dimensionWeights_, concentration_, settings_);
+  } else if (algorithm == "dimensionally_adaptive") {
+    return new HyperX::DalRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_, dimensionWidths_,
+        dimensionWeights_, concentration_, _inputPort, settings_);
+  } else if (algorithm == "skipping_dimensions") {
+    return new HyperX::SkippingDimensionsRoutingAlgorithm(
+        _name, _parent, _router, latency, baseVc_, numVcs_, dimensionWidths_,
+        dimensionWeights_, concentration_, _inputPort, settings_);
   } else {
     fprintf(stderr, "Unknown routing algorithm: '%s'\n", algorithm.c_str());
     assert(false);
