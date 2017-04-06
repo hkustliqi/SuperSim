@@ -27,7 +27,8 @@
 #include "network/hierarchicalhyperx/util.h"
 
 namespace HierarchicalHyperX {
-
+  u32 ProgressiveAdaptiveRandomRoutingAlgorithm::numMinimalRoutes_;
+  u32 ProgressiveAdaptiveRandomRoutingAlgorithm::numNonMinimalRoutes_;
 ProgressiveAdaptiveRandomRoutingAlgorithm::
   ProgressiveAdaptiveRandomRoutingAlgorithm(
     const std::string& _name, const Component* _parent, Router* _router,
@@ -45,10 +46,17 @@ ProgressiveAdaptiveRandomRoutingAlgorithm::
        _concentration, _globalLinksPerRouter, _randomGroup),
       bias_(_bias), threshold_(_threshold) {
   assert(numVcs_ >= 2 * globalDimWidths_.size() + 3);
+  ProgressiveAdaptiveRandomRoutingAlgorithm::numMinimalRoutes_ = 0;
+  ProgressiveAdaptiveRandomRoutingAlgorithm::numNonMinimalRoutes_ = 0;
 }
 
 ProgressiveAdaptiveRandomRoutingAlgorithm::
-  ~ProgressiveAdaptiveRandomRoutingAlgorithm() {}
+  ~ProgressiveAdaptiveRandomRoutingAlgorithm() {
+  printf("number of Minimal routes %u \n",
+         ProgressiveAdaptiveRandomRoutingAlgorithm::numMinimalRoutes_);
+  printf("number of Non Minimal routes %u \n",
+         ProgressiveAdaptiveRandomRoutingAlgorithm::numNonMinimalRoutes_);
+}
 
 void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
     Flit* _flit, RoutingAlgorithm::Response* _response) {
@@ -205,6 +213,7 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
     auto MINIt = MINOutputPorts.begin();
     std::advance(MINIt, MINRandom);
     u32 MINOutputPort = *(MINIt);
+    f64 MINVCAvailability = 0.0;
     f64 MINAvailability = 0.0;
 
     // select right vc for evaluation
@@ -212,13 +221,16 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
                                      localDimWeights_)) {
       for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
            vc += 2 * globalDimWidths_.size() + 3) {
-        MINAvailability += router_->congestionStatus(MINOutputPort, vc);
+        MINVCAvailability += router_->congestionStatus(MINOutputPort, vc);
       }
     } else {
       for (u32 vc = baseVc_; vc < baseVc_ + numVcs_;
            vc += 2 * globalDimWidths_.size() + 3) {
-        MINAvailability += router_->congestionStatus(MINOutputPort, vc);
+        MINVCAvailability += router_->congestionStatus(MINOutputPort, vc);
       }
+    }
+    for (u32 vc = baseVc_; vc < baseVc_ + numVcs_; vc += 1) {
+      MINAvailability += router_->congestionStatus(MINOutputPort, vc);
     }
 
     // remove local dst for Non MIN routing
@@ -243,6 +255,8 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
     std::advance(NonMINIt, NonMINRandom);
     u32 NonMINOutputPort = *(NonMINIt);
     f64 NonMINAvailability = 0.0;
+    f64 NonMINVCAvailability = 0.0;
+
     /* if (packet->message()->getTransaction() == 1500) {
       printf("NonMIN Path port = %u \n", NonMINOutputPort);
       for (u32 vc=0; vc < numVcs_; vc++) {
@@ -254,18 +268,22 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
                                      localDimWeights_)) {
       for (u32 vc = baseVc_ + 2; vc < baseVc_ + numVcs_;
            vc += 2 * globalDimWidths_.size() + 3) {
-        NonMINAvailability += router_->congestionStatus(
+        NonMINVCAvailability += router_->congestionStatus(
           NonMINOutputPort, vc);
       }
     } else {
       for (u32 vc = baseVc_ + 1; vc < baseVc_ + numVcs_;
            vc += 2 * globalDimWidths_.size() + 3) {
-        NonMINAvailability += router_->congestionStatus(
+        NonMINVCAvailability += router_->congestionStatus(
           NonMINOutputPort, vc);
       }
     }
+    for (u32 vc = baseVc_ + 1; vc < baseVc_ + numVcs_; vc += 1) {
+      NonMINAvailability += router_->congestionStatus(
+        NonMINOutputPort, vc);
+    }
 
-    std::vector<u32> dstRouterAdd(_destinationAddress);
+    /* std::vector<u32> dstRouterAdd(_destinationAddress);
     dstRouterAdd.erase(dstRouterAdd.begin());
     std::vector<u32> intermediateAdd(*(ri->intermediateAddress));
     u32 MINPathLen = getHopDistance(routerAddress, dstRouterAdd,
@@ -276,9 +294,10 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
       localDimWidths_, globalDimWidths_, globalDimWeights_);
     NonMINPathLen += getHopDistance(intermediateAdd, dstRouterAdd,
     localDimWidths_, globalDimWidths_, globalDimWeights_);
-
-    /* if (MINOutputPort >= getPortBase(concentration_, localDimWidths_,
-                                     localDimWeights_)) {
+    */
+    /*if (MINOutputPort >= getPortBase(concentration_, localDimWidths_,
+                                     localDimWeights_)
+       && routerAddress[1] == 0 && routerAddress[0] == 0) {
       printf("Router address is %s \n",
          strop::vecString<u32>(routerAddress).c_str());
       printf("Dst address is %s \n",
@@ -290,17 +309,21 @@ std::unordered_set<u32> ProgressiveAdaptiveRandomRoutingAlgorithm::routing(
     }*/
 
     // UGAL
-    if (MINAvailability * MINPathLen <=
-         (NonMINAvailability + 0.01) * NonMINPathLen + bias_
+    if ((NonMINOutputPort != MINOutputPort &&
+         MINAvailability  <= (NonMINAvailability + 0.01) * 2 + bias_)
+        || (NonMINOutputPort == MINOutputPort &&
+        MINVCAvailability  <= (NonMINVCAvailability + 0.01) * 2 + bias_)
         ) {
       assert(ri->intermediateAddress != nullptr);
       outputPorts =  MINOutputPorts;
+      ProgressiveAdaptiveRandomRoutingAlgorithm::numMinimalRoutes_++;
     } else {
       ri->valiantMode = true;
       // intermediate Add has been set
       assert(ri->intermediateAddress != nullptr);
       // switch to valiant
       outputPorts = NonMINOutputPorts;
+      ProgressiveAdaptiveRandomRoutingAlgorithm::numNonMinimalRoutes_++;
     }
 
   } else {

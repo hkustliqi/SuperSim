@@ -53,6 +53,8 @@ class ProgressiveAdaptiveRandomRoutingAlgorithm : public
   u32 setIntermediateAdd(std::vector<u32>* re) const;
   const f64 bias_;
   const f64 threshold_;
+  static u32 numMinimalRoutes_;
+  static u32 numNonMinimalRoutes_;
 };
 
 }  // namespace HierarchicalHyperX
