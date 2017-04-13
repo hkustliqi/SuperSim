@@ -132,7 +132,7 @@ void ProgressiveAdaptiveRandomRoutingAlgorithm::processRequest(
         vcSet = 2 + ri->globalHopCount;
       }
     } else {
-      vcSet = 1 + ri->globalHopCount;
+      vcSet = 2 + globalDimWidths_.size() + ri->globalHopCount;
     }
   }
 
