@@ -18,7 +18,7 @@
       {
         "num_vcs": 8,
         "routing": {
-          "algorithm": "progressive_adaptive",
+          "algorithm": "dimension_order",
           "latency": 1
         }
       }
