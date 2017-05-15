@@ -27,17 +27,11 @@
 
 #include "network/hierarchicalhyperx/DimOrderRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/GlobalAndLocalRandomRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/GlobalRandomRoutingAlgorithm.h"
+#include "network/hierarchicalhyperx/GlobalThresholdProgressiveAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/MinimalAdaptiveRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ValiantRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveAverageRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveAverageOffsetRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveAverageRandomRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ProgressiveAdaptiveGLRandomRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ProgressiveAdaptiveRandomRoutingAlgorithm.h"
 #include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveRoutingAlgorithm.h"
-#include "network/hierarchicalhyperx/ThresholdProgressiveAdaptiveGRoutingAlgorithm.h"
 #include "network/RoutingAlgorithm.h"
 
 namespace HierarchicalHyperX {

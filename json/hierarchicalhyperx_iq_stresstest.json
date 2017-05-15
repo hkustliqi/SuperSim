@@ -1,7 +1,7 @@
 {
   "simulator": {
-    "channel_cycle_time": 1,
-    "core_cycle_time": 1,
+    "channel_cycle_time": 1000, //picosecond
+    "core_cycle_time": 333,
     "print_progress": true,
     "print_interval": 1.0,  // seconds
     "random_seed": 12345678
@@ -16,20 +16,12 @@
     "concentration": 1,
     "traffic_classes": [
       {
-        "num_vcs": 4,
+        "num_vcs": 15,
         "routing": {
-          "algorithm": "dimension_order",
-          "output_type": "vc",
-          "output_algorithm": "random",
-          "max_outputs": 1,
-          "latency": 1
-        }
-      },
-      {
-        "num_vcs": 16,
-        "routing": {
-          "algorithm": "progressive_adaptive",
-          "latency": 1
+          "algorithm": "progressive_adaptive_random",
+          "latency": 1,
+          "random_group": false,
+          "bias": 0
         }
       }
     ],
@@ -37,10 +29,10 @@
       "latency": 1 // cycles
     },
     "internal_global_channel": {
-      "latency": 5 // cycles
+      "latency": 10 // cycles
     },
     "external_channel": {
-      "latency": 5 // cycles
+      "latency": 1 // cycles
     },
     "channel_log": {
       "file": "/dev/null"  // "channels.csv"
@@ -50,11 +42,13 @@
       "congestion_status": {
         "algorithm": "buffer_occupancy",
         "latency": 1,
-        "granularity": 0
+        "granularity": 0,
+        "minimum": 0.0,
+        "mode": "vc"
       },
-      "input_queue_depth": 16,
+      "input_queue_depth": 32,
       "vca_swa_wait": true,
-      "output_queue_depth": 64,
+      "output_queue_depth": 320,
       "crossbar": {
         "latency": 1  // cycles
       },
@@ -118,23 +112,34 @@
     },
     "applications": [
       {
-        "type": "stress_test",
-        "max_injection_rate": 0.10,
-        "warmup_threshold": 0.90,
+        "type": "blast",
+        "warmup_threshold": 0.40,
         "kill_on_saturation": false,
         "log_during_saturation": false,
         "blast_terminal": {
-          "traffic_class": 1,
-          "num_messages": 50,
-          "min_message_size": 1,
-          "max_message_size": 64,
-          "max_packet_size": 16,
+          // requests
+          "request_traffic_class": 0,
+          "request_injection_rate": 0.35,
+          // responses
+          "enable_responses": false,
+          "request_processing_latency": 1,
+          "max_outstanding_transactions": 0,
+          "response_traffic_class": 0,
+          // warmup
           "warmup_interval": 200,  // delivered flits
           "warmup_window": 15,
-          "warmup_attempts": 50,
+          "warmup_attempts": 40,
+          // traffic generation
+          "num_transactions": 200,
+          "max_packet_size": 1,
           "traffic_pattern": {
             "type": "uniform_random",
             "send_to_self": false
+          },
+          "message_size_distribution": {
+            "type": "random",
+            "min_message_size": 1,
+            "max_message_size": 1
           }
         },
         "rate_log": {
@@ -143,8 +148,5 @@
       }
     ]
   },
-  "debug": [
-    "Workload.Application_0",
-    "Workload.Application_0.BlastTerminal_17"
-  ]
+  "debug": []
 }

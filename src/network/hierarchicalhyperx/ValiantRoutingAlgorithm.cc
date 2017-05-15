@@ -66,13 +66,6 @@ void ValiantRoutingAlgorithm::processRequest(
     // delete the routing extension
     RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
         packet->getRoutingExtension());
-    /* if (ri->localDst != nullptr) {
-    delete reinterpret_cast<const std::vector<u32>*>(ri->localDst);
-    }
-    if (ri->localDstPort != nullptr) {
-    delete reinterpret_cast<const std::vector<u32>*>(ri->localDstPort);
-    } 
-    delete reinterpret_cast<const std::vector<u32>*>(ri->intermediateAddress);*/
     delete ri;
     packet->setRoutingExtension(nullptr);
   } else {
@@ -96,7 +89,7 @@ void ValiantRoutingAlgorithm::processRequest(
       packet->setRoutingExtension(ri);
     }
 
-    // figure out which VC set to use
+    // increment VcSet for every new group
     u32 vcSet = ri->globalHopCount;
     assert(vcSet <= 2 * globalDimWidths_.size() + 2);
 

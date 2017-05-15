@@ -58,11 +58,6 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
         localDimensionWeights_, concentration_, globalLinksPerRouter_,
         randomGroup);
-  } else if (algorithm == "global_random") {
-    return new HierarchicalHyperX::GlobalRandomRoutingAlgorithm(
-        _name, _parent, _router, latency, baseVc_, numVcs_,
-        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
-        localDimensionWeights_, concentration_, globalLinksPerRouter_);
   } else if (algorithm == "global_local_random") {
     return new HierarchicalHyperX::GlobalAndLocalRandomRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,
@@ -74,40 +69,8 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
         localDimensionWeights_, concentration_, globalLinksPerRouter_,
         congestionThreshold, localDetour);
-  } else if (algorithm == "progressive_adaptive") {
-    return new HierarchicalHyperX::ProgressiveAdaptiveRoutingAlgorithm(
-        _name, _parent, _router, latency, baseVc_, numVcs_,
-        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
-        localDimensionWeights_, concentration_, globalLinksPerRouter_,
-        randomGroup, bias);
-  } else if (algorithm == "progressive_adaptive_avg_offset") {
-    return new HierarchicalHyperX::
-      ProgressiveAdaptiveAverageOffsetRoutingAlgorithm(
-        _name, _parent, _router, latency, baseVc_, numVcs_,
-        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
-        localDimensionWeights_, concentration_, globalLinksPerRouter_,
-        randomGroup, bias);
-  } else if (algorithm == "progressive_adaptive_avg") {
-    return new HierarchicalHyperX::ProgressiveAdaptiveAverageRoutingAlgorithm(
-        _name, _parent, _router, latency, baseVc_, numVcs_,
-        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
-        localDimensionWeights_, concentration_, globalLinksPerRouter_,
-        randomGroup);
-  } else if (algorithm == "progressive_adaptive_avg_random") {
-    return new
-      HierarchicalHyperX::ProgressiveAdaptiveAverageRandomRoutingAlgorithm(
-        _name, _parent, _router, latency, baseVc_, numVcs_,
-        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
-        localDimensionWeights_, concentration_, globalLinksPerRouter_,
-        randomGroup, bias);
   } else if (algorithm == "progressive_adaptive_random") {
     return new HierarchicalHyperX::ProgressiveAdaptiveRandomRoutingAlgorithm(
-        _name, _parent, _router, latency, baseVc_, numVcs_,
-        globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
-        localDimensionWeights_, concentration_, globalLinksPerRouter_,
-        randomGroup, bias, congestionThreshold);
-  } else if (algorithm == "progressive_adaptive_gl_random") {
-    return new HierarchicalHyperX::ProgressiveAdaptiveGLRandomRoutingAlgorithm(
         _name, _parent, _router, latency, baseVc_, numVcs_,
         globalDimensionWidths_, globalDimensionWeights_, localDimensionWidths_,
         localDimensionWeights_, concentration_, globalLinksPerRouter_,
@@ -120,7 +83,7 @@ RoutingAlgorithm* RoutingAlgorithmFactory::createRoutingAlgorithm(
         congestionThreshold, randomGroup);
   } else if (algorithm == "threshold_progressive_adaptive_g") {
     return new HierarchicalHyperX::
-        ThresholdProgressiveAdaptiveGRoutingAlgorithm(
+        GlobalThresholdProgressiveAdaptiveRoutingAlgorithm(
             _name, _parent, _router, latency, baseVc_, numVcs_,
             globalDimensionWidths_, globalDimensionWeights_,
             localDimensionWidths_, localDimensionWeights_, concentration_,

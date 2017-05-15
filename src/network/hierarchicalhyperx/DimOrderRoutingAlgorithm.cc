@@ -77,6 +77,7 @@ void DimOrderRoutingAlgorithm::processRequest
     // figure out which VC set to use
     RoutingInfo* ri = reinterpret_cast<RoutingInfo*>(
       packet->getRoutingExtension());
+    // For DOR, vcSet is incremented once in a new group
     u32 vcSet = ri->globalHopCount;
 
     // format the response
@@ -101,8 +102,6 @@ void DimOrderRoutingAlgorithm::processRequest
              vc += globalDimWidths_.size() + 1) {
           _response->add(outputPort, vc);
         }
-        // printf("Router address is %s \n",
-        // strop::vecString<u32>(router_->address()).c_str());
       }
     }
     assert(_response->size() > 0);

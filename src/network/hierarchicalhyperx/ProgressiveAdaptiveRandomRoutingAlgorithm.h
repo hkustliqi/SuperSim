@@ -50,7 +50,6 @@ class ProgressiveAdaptiveRandomRoutingAlgorithm : public
  private:
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress) const;
-  u32 setIntermediateAdd(std::vector<u32>* re) const;
   const f64 bias_;
   const f64 threshold_;
   static u32 numMinimalRoutes_;

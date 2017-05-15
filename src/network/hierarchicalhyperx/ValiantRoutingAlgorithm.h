@@ -51,6 +51,9 @@ class ValiantRoutingAlgorithm : public DimOrderRoutingAlgorithm {
   std::unordered_set<u32> routing(
       Flit* _flit, const std::vector<u32>& _destinationAddress,
       bool _randomGroup) const;
+  // randomGroup_ is true means as long as we reach intermediate group then we
+  // can proceed to destination, i.e., VALg. If randomGroup_ is set as
+  // false then we are using VALn
   const bool randomGroup_;
 };
 

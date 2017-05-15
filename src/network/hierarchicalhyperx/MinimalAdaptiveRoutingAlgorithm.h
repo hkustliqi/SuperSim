@@ -27,6 +27,12 @@
 
 namespace HierarchicalHyperX {
 
+// This routing algorithm will select the path that is least congested in
+// reaching the local dst. Once at the local dst, it will check the global
+// link congestion status and compare that with the threshold. If larger than
+// threshold and permitted by localDeroute, it will switch local dst, i.e.,
+// try a different global link
+
 class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
  public:
   MinimalAdaptiveRoutingAlgorithm(
@@ -36,7 +42,7 @@ class MinimalAdaptiveRoutingAlgorithm : public RoutingAlgorithm {
     const std::vector<u32>& _globalDimensionWeights,
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
-    u32 _concentration, u32 _globalLinksPerRouter, f64 _threshold_,
+    u32 _concentration, u32 _globalLinksPerRouter, f64 _threshold,
     u32 _localDeroute);
 
   ~MinimalAdaptiveRoutingAlgorithm();

@@ -28,6 +28,11 @@
 
 namespace HierarchicalHyperX {
 
+// This routing algorithm will use the threshold parameter to decide if a
+// link is congested. It will check for every local AND global link in the
+// first group for congestion, and if found any congested link, it will
+// switch to Valiant's routing.
+
 class ThresholdProgressiveAdaptiveRoutingAlgorithm
     : public ValiantRoutingAlgorithm {
  public:
@@ -39,7 +44,7 @@ class ThresholdProgressiveAdaptiveRoutingAlgorithm
     const std::vector<u32>& _localDimensionWidths,
     const std::vector<u32>& _localDimensionWeights,
     u32 _concentration, u32 _globalLinksPerRouter,
-    f64 _threshold_, bool _randomGroup);
+    f64 _threshold, bool _randomGroup);
 
   ~ThresholdProgressiveAdaptiveRoutingAlgorithm();
 

@@ -27,6 +27,10 @@
 
 namespace HierarchicalHyperX {
 
+// This routing algorihtm will resolve the different global and local
+// dimensions between src and dst in a random fashion, as compared with
+// the fixed order in DimOrderRouting
+
 class GlobalAndLocalRandomRoutingAlgorithm : public RoutingAlgorithm {
  public:
   GlobalAndLocalRandomRoutingAlgorithm(

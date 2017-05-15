@@ -82,7 +82,7 @@ void MinimalAdaptiveRoutingAlgorithm::processRequest(
     packet->setRoutingExtension(ri);
   }
 
-  // figure out which VC set to use
+  // increment VcSet for each hop
   u32 vcSet = _flit->packet()->getHopCount() - 1;
 
   // format the response
